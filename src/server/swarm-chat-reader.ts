@@ -34,6 +34,40 @@ session_id = None
 session_title = None
 messages = []
 
+def render_content(value):
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped.startswith("[") or stripped.startswith("{"):
+            try:
+                return render_content(json.loads(value))
+            except Exception:
+                return value
+        return value
+    if isinstance(value, list):
+        parts = []
+        for block in value:
+            if not isinstance(block, dict):
+                parts.append(str(block))
+                continue
+            btype = block.get("type")
+            if btype in (None, "text"):
+                parts.append(render_content(block.get("text", block.get("content", ""))))
+            elif btype == "tool_use":
+                parts.append("[tool:" + str(block.get("name", "?")) + "]")
+            elif btype == "tool_result":
+                parts.append(render_content(block.get("content", ""))[:400])
+        return "\\n".join(part for part in parts if part)
+    if isinstance(value, dict):
+        if value.get("type") == "tool_use":
+            return "[tool:" + str(value.get("name", "?")) + "]"
+        nested = value.get("text")
+        if nested is None:
+            nested = value.get("content")
+        return render_content(nested) if nested is not None else str(value)
+    return str(value)
+
 if "sessions" in table_names:
     session_cols = {row[1] for row in cur.execute("PRAGMA table_info(sessions)").fetchall()}
     title_col = "title" if "title" in session_cols else None
@@ -78,42 +112,7 @@ if session_id and "messages" in table_names:
         ).fetchall()
         for r in reversed(rows):
             content = r["content"]
-            text = ""
-            if isinstance(content, str):
-                stripped = content.strip()
-                if stripped.startswith("[") or stripped.startswith("{"):
-                    try:
-                        parsed = json.loads(content)
-                        if isinstance(parsed, list):
-                            parts = []
-                            for block in parsed:
-                                if not isinstance(block, dict):
-                                    continue
-                                btype = block.get("type")
-                                if btype in (None, "text"):
-                                    parts.append(block.get("text", ""))
-                                elif btype == "tool_use":
-                                    parts.append("[tool:" + str(block.get("name", "?")) + "]")
-                                elif btype == "tool_result":
-                                    val = block.get("content", "")
-                                    if isinstance(val, list):
-                                        sub = []
-                                        for v in val:
-                                            if isinstance(v, dict) and v.get("type") == "text":
-                                                sub.append(v.get("text", ""))
-                                        val = "\\n".join(sub)
-                                    parts.append(str(val)[:400])
-                            text = "\\n".join(p for p in parts if p)
-                        elif isinstance(parsed, dict):
-                            text = parsed.get("text") or parsed.get("content") or content
-                        else:
-                            text = content
-                    except Exception:
-                        text = content
-                else:
-                    text = content
-            else:
-                text = str(content) if content is not None else ""
+            text = render_content(content)
             ts = None
             if ts_col:
                 raw_ts = r["ts"]

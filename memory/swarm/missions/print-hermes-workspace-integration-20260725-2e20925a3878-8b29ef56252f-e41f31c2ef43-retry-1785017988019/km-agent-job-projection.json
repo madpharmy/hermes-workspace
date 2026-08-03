@@ -1,0 +1,185 @@
+{
+  "schema": "print-anything-job-projection.v1",
+  "generated_at": "2026-07-25T22:23:08.514942Z",
+  "job_id": "hermes-workspace-integration-20260725",
+  "title": "Hermes Workspace print-pipeline integration proof",
+  "board": "fabrication",
+  "current_stage": "S0",
+  "completion_state": "ACTIVE",
+  "highest_evidence_tier": "CONCEPT",
+  "release": {
+    "status": "NOT_RELEASED",
+    "released_at": null,
+    "artifact_sha256": null
+  },
+  "cycle_budget": {
+    "used": 0,
+    "limit": 5,
+    "exhausted": false
+  },
+  "approvals": {
+    "phase_a": {
+      "status": "BLOCKED",
+      "actor": null,
+      "approved_at": null,
+      "artifact": null,
+      "artifact_sha256": null
+    },
+    "phase_b": {
+      "status": "BLOCKED",
+      "actor": null,
+      "approved_at": null,
+      "artifact": null,
+      "artifact_sha256": null
+    },
+    "physical": {
+      "status": "BLOCKED",
+      "actor": null,
+      "approved_at": null,
+      "artifact": null,
+      "artifact_sha256": null
+    }
+  },
+  "stages": [
+    {
+      "stage": "S0",
+      "name": "Intake and authority",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": false
+    },
+    {
+      "stage": "S1",
+      "name": "Intent contract",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": false
+    },
+    {
+      "stage": "S2",
+      "name": "Functional decomposition",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": false
+    },
+    {
+      "stage": "S3",
+      "name": "Route alternatives",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": false
+    },
+    {
+      "stage": "S4",
+      "name": "Engineering architecture",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": false
+    },
+    {
+      "stage": "S5",
+      "name": "Independent engineering review",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": false
+    },
+    {
+      "stage": "S6",
+      "name": "Coupon preparation",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": false
+    },
+    {
+      "stage": "S7",
+      "name": "Editable source and fabrication twin",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": false
+    },
+    {
+      "stage": "S8",
+      "name": "Digital validation",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": true
+    },
+    {
+      "stage": "S9",
+      "name": "Exact manufacturing preflight",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": true
+    },
+    {
+      "stage": "S10",
+      "name": "Physical execution and measurements",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": true
+    },
+    {
+      "stage": "S11",
+      "name": "Release review",
+      "applicable": true,
+      "verdict": "BLOCKED",
+      "finding_count": 1,
+      "evidence_count": 0,
+      "independent": true
+    }
+  ],
+  "provider_runs": [],
+  "ledger_valid": true,
+  "pipeline_passed": false,
+  "pipeline_registry_sha256": "e41f31c2ef431a4844cf5688be9d780c66ae38f967259debba314e4a7d9e7066",
+  "provider_bindings": {
+    "valid": true,
+    "checked": 0,
+    "errors": []
+  },
+  "pre_model_gate": {
+    "ready": false,
+    "model_start_authorized": false,
+    "errors": [
+      "S0-S5 are not closed; first blocker=S0, required approval=None",
+      "job has no compiled semantic contract",
+      "pre-model baseline is missing",
+      "Phase A approval is invalid: approval missing",
+      "Phase B approval is invalid: approval missing"
+    ],
+    "baseline": null,
+    "baseline_sha256": null,
+    "phase_a_approved": false,
+    "phase_b_approved": false,
+    "stages_closed_through": null
+  },
+  "source": {
+    "manifest": "manifest.json",
+    "manifest_sha256": "2e20925a38786f9eb9a114b69a44f12f6178876b780f7e5f2928cb1947b766b7",
+    "stage_ledger": "stage-gates.json",
+    "stage_ledger_sha256": "8b29ef56252ff4d2b156bed77039a942fbb010b47604b83816c18571a575a7dc"
+  },
+  "read_only": true
+}

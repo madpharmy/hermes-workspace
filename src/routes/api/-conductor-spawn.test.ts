@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { NATIVE_CONDUCTOR_MODE_NOTE, buildNativeConductorAssignments, toNativeConductorMissionRecord } from './conductor-spawn'
+import {
+  NATIVE_CONDUCTOR_MODE_NOTE,
+  buildNativeConductorAssignments,
+  printAnythingMissionId,
+  retryMissionId,
+  selectReusablePrintAnythingMission,
+  toNativeConductorMissionRecord,
+} from './conductor-spawn'
 import type { SwarmMission } from '../../server/swarm-missions'
 
 describe('native Conductor fallback', () => {
@@ -54,6 +61,7 @@ describe('native Conductor fallback', () => {
           rationale: 'Builder',
           dependsOn: [],
           reviewRequired: false,
+          criticality: 'hard',
           state: 'dispatched',
           dispatchedAt: 1,
           completedAt: null,
@@ -74,5 +82,66 @@ describe('native Conductor fallback', () => {
     expect(record.modeOfficialOotb).toBe(true)
     expect(record.modeNote).toBe(NATIVE_CONDUCTOR_MODE_NOTE)
     expect(record.lines.join('\n')).toContain('builder dispatched')
+  })
+
+  it('uses canonical projection hashes as the idempotency identity for print missions', () => {
+    const base = {
+      jobId: 'fixture-job',
+      projectionIdentity: {
+        schema: 'print-anything-job-projection.v1' as const,
+        manifestSha256: 'a'.repeat(64),
+        stageLedgerSha256: 'b'.repeat(64),
+        pipelineRegistrySha256: 'c'.repeat(64),
+      },
+    }
+
+    expect(printAnythingMissionId(base)).toBe(
+      'print-fixture-job-aaaaaaaaaaaa-bbbbbbbbbbbb-cccccccccccc',
+    )
+    expect(
+      printAnythingMissionId({
+        ...base,
+        projectionIdentity: {
+          ...base.projectionIdentity,
+          stageLedgerSha256: 'd'.repeat(64),
+        },
+      }),
+    ).not.toBe(printAnythingMissionId(base))
+  })
+
+  it('creates a distinct, traceable retry id after a blocked print mission', () => {
+    expect(retryMissionId('print-fixture-job-hashes', 1234)).toBe(
+      'print-fixture-job-hashes-retry-1234',
+    )
+  })
+
+  it('reuses an active retry instead of creating parallel print lifecycles', () => {
+    const blockedBase: SwarmMission = {
+      id: 'print-fixture-job-hashes',
+      title: 'Blocked base',
+      state: 'blocked',
+      createdAt: 1,
+      updatedAt: 2,
+      assignments: [],
+      events: [],
+    }
+    const activeRetry: SwarmMission = {
+      ...blockedBase,
+      id: 'print-fixture-job-hashes-retry-1234',
+      title: 'Active retry',
+      state: 'executing',
+      createdAt: 3,
+      updatedAt: 4,
+    }
+
+    expect(
+      selectReusablePrintAnythingMission(
+        [activeRetry, blockedBase],
+        blockedBase.id,
+      )?.id,
+    ).toBe(activeRetry.id)
+    expect(
+      selectReusablePrintAnythingMission([blockedBase], blockedBase.id),
+    ).toBeNull()
   })
 })

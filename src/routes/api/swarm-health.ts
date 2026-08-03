@@ -118,12 +118,11 @@ export function parseModelAuthEventsFromText(text: string): {
   const authPatterns = [
     /primary provider auth failed/i,
     /no codex credentials/i,
-    /no .*oauth token found/i,
+    /no codex oauth token found/i,
     /copilot token validation failed/i,
     /classic pat|classic personal access token/i,
-    /\b401\b/i,
-    /\bunauthorized\b/i,
-    /\bauthentication\b/i,
+    /openai(?:-codex)?.*(?:\b401\b|\bunauthorized\b|authentication failed)/i,
+    /(?:\b401\b|\bunauthorized\b|authentication failed).*openai(?:-codex)?/i,
   ]
   const fallbackPatterns = [
     /falling through to fallback:\s*([^/\s]+)\/([^\s]+)/i,

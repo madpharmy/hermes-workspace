@@ -2,6 +2,7 @@ import { createServer } from 'node:http'
 import { readFile, stat } from 'node:fs/promises'
 import { join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { networkInterfaces } from 'node:os'
 import server from './dist/server/server.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -44,6 +45,55 @@ const port = parseInt(process.env.PORT || '3000', 10)
 // on a LAN / Tailscale / public surface must opt in explicitly with
 // HOST=0.0.0.0 *and* set CLAUDE_PASSWORD (enforced below). See #122.
 const host = process.env.HOST || '127.0.0.1'
+
+function isTailscaleIPv4(address) {
+  const parts = address.split('.').map(Number)
+  return (
+    parts.length === 4 &&
+    parts.every(Number.isInteger) &&
+    parts[0] === 100 &&
+    parts[1] >= 64 &&
+    parts[1] <= 127
+  )
+}
+
+function isPrivateLanIPv4(address) {
+  const parts = address.split('.').map(Number)
+  if (parts.length !== 4 || !parts.every(Number.isInteger)) return false
+  return (
+    parts[0] === 10 ||
+    (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+    (parts[0] === 192 && parts[1] === 168)
+  )
+}
+
+function networkUrl(requestedPort) {
+  const configuredHost = (process.env.HERMES_PUBLIC_HOST || '').trim()
+  const interfaces = Object.values(networkInterfaces()).flat()
+  const ipv4Addresses = interfaces
+    .filter((entry) => entry && entry.family === 'IPv4' && !entry.internal)
+    .map((entry) => entry.address)
+
+  const tailscaleAddress =
+    (configuredHost && isTailscaleIPv4(configuredHost)
+      ? configuredHost
+      : ipv4Addresses.find(isTailscaleIPv4)) || ''
+  const lanAddress =
+    (configuredHost && isPrivateLanIPv4(configuredHost)
+      ? configuredHost
+      : ipv4Addresses.find(isPrivateLanIPv4)) || ''
+  const selectedAddress = tailscaleAddress || lanAddress || '127.0.0.1'
+  const source = tailscaleAddress
+    ? 'tailscale'
+    : lanAddress
+      ? 'lan'
+      : 'localhost'
+
+  return {
+    url: `http://${selectedAddress}:${requestedPort}`,
+    source,
+  }
+}
 
 function isNonLoopbackHost(h) {
   if (!h) return false
@@ -199,6 +249,30 @@ async function tryServeStatic(req, res) {
 }
 
 async function requestHandler(req, res) {
+  const incomingUrl = new URL(
+    req.url || '/',
+    `http://${req.headers.host || 'localhost'}`,
+  )
+
+  if (req.method === 'GET' && incomingUrl.pathname === '/api/network-url') {
+    const requestedPort = parseInt(incomingUrl.searchParams.get('port') || '', 10)
+    const safePort =
+      Number.isInteger(requestedPort) &&
+      requestedPort >= 1 &&
+      requestedPort <= 65535
+        ? requestedPort
+        : port
+    const body = JSON.stringify(networkUrl(safePort))
+    res.writeHead(200, {
+      ...ALWAYS_HEADERS,
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Length': Buffer.byteLength(body),
+      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+    })
+    res.end(body)
+    return
+  }
+
   // Try static files first (client assets)
   if (req.method === 'GET' || req.method === 'HEAD') {
     const served = await tryServeStatic(req, res)

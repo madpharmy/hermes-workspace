@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { delimiter, dirname, join, resolve } from 'node:path'
 import { homedir } from 'node:os'
+import { resolveHermesCliBin } from './hermes-cli'
 
 const CLAUDE_HEALTH_TIMEOUT_MS = 2_000
 const CLAUDE_START_PORT = 8642
@@ -72,7 +73,12 @@ export function resolveClaudeAgentDir(
   )
 
   for (const candidate of candidates) {
-    if (existsSync(resolve(candidate, 'webapi'))) return candidate
+    if (
+      existsSync(resolve(candidate, 'webapi')) ||
+      existsSync(resolve(candidate, 'gateway', 'run.py'))
+    ) {
+      return candidate
+    }
   }
 
   return null
@@ -80,27 +86,23 @@ export function resolveClaudeAgentDir(
 
 /** Find the `claude` CLI binary installed by Nous's installer (or on PATH). */
 export function resolveClaudeBinary(): string | null {
-  const candidates = [
-    resolve(homedir(), '.local', 'bin', 'hermes'),
-    resolve(homedir(), '.hermes', 'bin', 'hermes'),
-    resolve(homedir(), '.claude', 'bin', 'claude'),
-    resolve(homedir(), '.local', 'bin', 'claude'),
-  ]
-  for (const c of candidates) {
-    if (existsSync(c)) return c
-  }
-  return null
+  return resolveHermesCliBin()
 }
 
-export function resolveClaudePython(agentDir: string): string {
-  const venvPython = resolve(agentDir, '.venv', 'bin', 'python')
+export function resolveClaudePython(
+  agentDir: string,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  const executable =
+    platform === 'win32' ? ['Scripts', 'python.exe'] : ['bin', 'python']
+  const venvPython = resolve(agentDir, '.venv', ...executable)
   if (existsSync(venvPython)) return venvPython
-  const uvVenv = resolve(agentDir, 'venv', 'bin', 'python')
+  const uvVenv = resolve(agentDir, 'venv', ...executable)
   if (existsSync(uvVenv)) return uvVenv
   // Nous installer ships its own uv-managed python alongside the binary
-  const nousPython = resolve(homedir(), '.claude', 'venv', 'bin', 'python')
+  const nousPython = resolve(homedir(), '.claude', 'venv', ...executable)
   if (existsSync(nousPython)) return nousPython
-  return 'python3'
+  return platform === 'win32' ? 'python' : 'python3'
 }
 
 export async function isClaudeAgentHealthy(
@@ -175,10 +177,16 @@ export async function startClaudeAgent(): Promise<StartClaudeAgentResult> {
             PATH: [
               resolve(homedir(), '.claude', 'bin'),
               resolve(homedir(), '.local', 'bin'),
+              agentDir && process.platform === 'win32'
+                ? resolve(agentDir, '.venv', 'Scripts')
+                : '',
+              agentDir && process.platform === 'win32'
+                ? resolve(agentDir, 'venv', 'Scripts')
+                : '',
               agentDir ? resolve(agentDir, '.venv', 'bin') : '',
               agentDir ? resolve(agentDir, 'venv', 'bin') : '',
               process.env.PATH || '',
-            ].filter(Boolean).join(':'),
+            ].filter(Boolean).join(delimiter),
           },
         },
       )

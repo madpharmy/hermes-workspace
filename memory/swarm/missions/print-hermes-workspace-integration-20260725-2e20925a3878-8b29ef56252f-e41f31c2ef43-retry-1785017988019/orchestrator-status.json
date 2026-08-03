@@ -1,0 +1,9 @@
+{
+  "passed": false,
+  "ledger_valid": true,
+  "pipeline_passed": false,
+  "advance_allowed": false,
+  "first_blocking_stage": "S0",
+  "errors": [],
+  "required_approval": null
+}

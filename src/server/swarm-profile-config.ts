@@ -15,9 +15,9 @@
  */
 
 import { copyFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, renameSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import * as yaml from 'yaml'
+import { getHermesRoot } from './claude-paths'
 
 export type ConfigSyncResult =
   | { ok: true; changed: boolean; previous?: { provider: string; default: string } }
@@ -57,14 +57,30 @@ function linkSharedFile(source: string, target: string): boolean {
       return false
     }
   }
-  symlinkSync(source, target)
+  try {
+    symlinkSync(source, target)
+  } catch {
+    copyFileSync(source, target)
+  }
   return true
+}
+
+function syncSharedProfileFile(source: string, target: string, replaceLocal: boolean): boolean {
+  if (!existsSync(source)) return false
+  if (existsSync(target) && !replaceLocal) {
+    try {
+      if (!lstatSync(target).isSymbolicLink()) return false
+    } catch {
+      return false
+    }
+  }
+  return linkSharedFile(source, target)
 }
 
 /**
  * Ensure a worker HERMES_HOME has enough runtime config to boot Hermes.
  *
- * Swarm dispatch runs workers with HERMES_HOME=~/.hermes/profiles/<workerId>.
+ * Swarm dispatch runs workers with HERMES_HOME=<active Hermes root>/profiles/<workerId>.
  * A brand-new profile only has memory/runtime files, so `hermes chat -q` exits
  * with first-run setup before the worker can do any work. Bootstrap by copying
  * the operator's non-secret config.yaml and linking the private .env locally.
@@ -75,53 +91,24 @@ export function ensureSwarmProfileConfig(profilePath: string): ProfileBootstrapR
   try {
     mkdirSync(profilePath, { recursive: true })
 
+    const sourceRoot = getHermesRoot()
     const configPath = join(profilePath, 'config.yaml')
-    const sourceConfig = join(homedir(), '.hermes', 'config.yaml')
+    const sourceConfig = join(sourceRoot, 'config.yaml')
     if (!existsSync(configPath) && existsSync(sourceConfig)) {
       copyFileSync(sourceConfig, configPath)
       result.configCreated = true
     }
 
     const envPath = join(profilePath, '.env')
-    const sourceEnv = join(homedir(), '.hermes', '.env')
-    if (existsSync(sourceEnv)) {
-      let shouldLink = !existsSync(envPath)
-      if (!shouldLink) {
-        try {
-          const stat = lstatSync(envPath)
-          shouldLink = stat.isSymbolicLink()
-          if (shouldLink) unlinkSync(envPath)
-        } catch {
-          shouldLink = false
-        }
-      }
-      if (shouldLink) {
-        symlinkSync(sourceEnv, envPath)
-        result.envLinked = true
-      }
-    }
+    const sourceEnv = join(sourceRoot, '.env')
+    result.envLinked = syncSharedProfileFile(sourceEnv, envPath, result.configCreated)
 
     const authPath = join(profilePath, 'auth.json')
-    const sourceAuth = join(homedir(), '.hermes', 'auth.json')
-    if (existsSync(sourceAuth)) {
-      let shouldLink = !existsSync(authPath)
-      if (!shouldLink) {
-        try {
-          const stat = lstatSync(authPath)
-          shouldLink = stat.isSymbolicLink()
-          if (shouldLink) unlinkSync(authPath)
-        } catch {
-          shouldLink = false
-        }
-      }
-      if (shouldLink) {
-        symlinkSync(sourceAuth, authPath)
-        result.authLinked = true
-      }
-    }
+    const sourceAuth = join(sourceRoot, 'auth.json')
+    result.authLinked = syncSharedProfileFile(sourceAuth, authPath, result.configCreated)
 
     const mcpTokensDir = join(profilePath, 'mcp-tokens')
-    const sourceMcpTokensDir = join(homedir(), '.hermes', 'mcp-tokens')
+    const sourceMcpTokensDir = join(sourceRoot, 'mcp-tokens')
     if (existsSync(sourceMcpTokensDir)) {
       mkdirSync(mcpTokensDir, { recursive: true })
       for (const name of readdirSync(sourceMcpTokensDir)) {

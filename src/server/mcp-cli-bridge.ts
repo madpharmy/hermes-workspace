@@ -1,7 +1,5 @@
 import { spawn } from 'node:child_process'
-import { existsSync } from 'node:fs'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { resolveHermesCliBin } from './hermes-cli'
 
 export interface CliTestResult {
   ok: boolean
@@ -13,24 +11,6 @@ export interface CliTestResult {
 
 const ANSI_RE = /\x1b\[[0-9;]*m/g
 const DEFAULT_TIMEOUT_MS = 60_000
-
-const HERMES_BIN_CANDIDATES = [
-  process.env.HERMES_CLI_BIN,
-  join(homedir(), '.hermes', 'hermes-agent', 'venv', 'bin', 'hermes'),
-  join(homedir(), '.local', 'bin', 'hermes'),
-  'hermes',
-].filter((value): value is string => Boolean(value))
-
-function resolveHermesBin(): string {
-  for (const candidate of HERMES_BIN_CANDIDATES) {
-    if (candidate.includes('/')) {
-      if (existsSync(candidate)) return candidate
-      continue
-    }
-    return candidate
-  }
-  return 'hermes'
-}
 
 function stripAnsi(text: string): string {
   return text.replace(ANSI_RE, '')
@@ -45,7 +25,7 @@ function execHermes(
     // SIGKILL the whole tree (Python CLI + any MCP stdio grandchildren it
     // spawned) by sending the signal to -pid. Without this the grandchild
     // can outlive the killed CLI as an orphan. Codex review feedback.
-    const child = spawn(resolveHermesBin(), args, {
+    const child = spawn(resolveHermesCliBin(), args, {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: process.env,
       detached: true,

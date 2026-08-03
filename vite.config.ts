@@ -3,7 +3,7 @@ import { execSync, spawn } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
 import net from 'node:net'
-import { resolve, dirname } from 'node:path'
+import { delimiter, resolve, dirname } from 'node:path'
 import os from 'node:os'
 
 // devtools removed
@@ -43,15 +43,32 @@ function resolveClaudeAgentDir(env: Record<string, string>): string | null {
   )
 
   for (const candidate of candidates) {
-    if (existsSync(resolve(candidate, 'webapi'))) return candidate
+    if (
+      existsSync(resolve(candidate, 'webapi')) ||
+      existsSync(resolve(candidate, 'gateway', 'run.py'))
+    ) {
+      return candidate
+    }
   }
   return null
 }
 
 /** Find the Hermes CLI binary used to start the local gateway. */
-function resolveClaudeBinary(): string | null {
+function resolveClaudeBinary(
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  const agentPath =
+    env.HERMES_AGENT_PATH ||
+    env.CLAUDE_AGENT_PATH ||
+    process.env.HERMES_AGENT_PATH ||
+    process.env.CLAUDE_AGENT_PATH ||
+    ''
   const candidates = [
-    process.env.HERMES_CLI_BIN || '',
+    env.HERMES_CLI_PATH || process.env.HERMES_CLI_PATH || '',
+    env.HERMES_CLI_BIN || process.env.HERMES_CLI_BIN || '',
+    process.platform === 'win32' && agentPath
+      ? resolve(agentPath, '.venv', 'Scripts', 'hermes.exe')
+      : '',
     resolve(os.homedir(), '.hermes', 'hermes-agent', 'venv', 'bin', 'hermes'),
     resolve(os.homedir(), '.claude', 'bin', 'claude'),
     resolve(os.homedir(), '.local', 'bin', 'claude'),
@@ -66,12 +83,16 @@ function resolveClaudeBinary(): string | null {
  *  Prefers .venv/bin/python inside agentDir, falls back to system python3.
  */
 function resolveClaudePython(agentDir: string): string {
-  const venvPython = resolve(agentDir, '.venv', 'bin', 'python')
+  const executable =
+    process.platform === 'win32'
+      ? ['Scripts', 'python.exe']
+      : ['bin', 'python']
+  const venvPython = resolve(agentDir, '.venv', ...executable)
   if (existsSync(venvPython)) return venvPython
   // uv creates 'venv' not '.venv' sometimes
-  const uvVenv = resolve(agentDir, 'venv', 'bin', 'python')
+  const uvVenv = resolve(agentDir, 'venv', ...executable)
   if (existsSync(uvVenv)) return uvVenv
-  return 'python3'
+  return process.platform === 'win32' ? 'python' : 'python3'
 }
 
 /** Check if hermes-agent health endpoint is responding */
@@ -128,7 +149,7 @@ const config = defineConfig(({ mode, command }) => {
       return
     }
 
-    const claudeBin = resolveClaudeBinary()
+    const claudeBin = resolveClaudeBinary(env)
     const agentDir = resolveClaudeAgentDir(env)
 
     // Prefer the `hermes gateway run` binary path (Nous installer's canonical
@@ -180,12 +201,18 @@ const config = defineConfig(({ mode, command }) => {
         PATH: [
           resolve(os.homedir(), '.claude', 'bin'),
           resolve(os.homedir(), '.local', 'bin'),
+          agentDir && process.platform === 'win32'
+            ? resolve(agentDir, '.venv', 'Scripts')
+            : '',
+          agentDir && process.platform === 'win32'
+            ? resolve(agentDir, 'venv', 'Scripts')
+            : '',
           agentDir ? resolve(agentDir, '.venv', 'bin') : '',
           agentDir ? resolve(agentDir, 'venv', 'bin') : '',
           process.env.PATH || '',
         ]
           .filter(Boolean)
-          .join(':'),
+          .join(delimiter),
       },
     })
 

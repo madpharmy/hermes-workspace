@@ -13,6 +13,7 @@ export type ParsedSwarmCheckpoint = {
 }
 
 const LABELS = ['STATE', 'FILES_CHANGED', 'COMMANDS_RUN', 'RESULT', 'BLOCKER', 'NEXT_ACTION'] as const
+const REQUIRED_LABELS = ['STATE', 'RESULT', 'BLOCKER', 'NEXT_ACTION'] as const
 
 type Label = typeof LABELS[number]
 
@@ -56,7 +57,7 @@ export function parseSwarmCheckpoint(text: string): ParsedSwarmCheckpoint | null
     if (current) fields[current] = `${fields[current] ?? ''}\n${line}`
   }
 
-  for (const label of LABELS) {
+  for (const label of REQUIRED_LABELS) {
     if (!(label in fields)) return null
   }
   const stateRaw = clean(fields.STATE)?.toUpperCase().split(/\s+/)[0]

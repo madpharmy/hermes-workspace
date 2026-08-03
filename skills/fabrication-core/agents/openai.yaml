@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fabrication Core"
+  short_description: "Gate fabrication evidence through Orca"
+  default_prompt: "Use $fabrication-core to inspect one bounded print-job stage through the canonical Orca conductor without changing job authority or starting a physical print."

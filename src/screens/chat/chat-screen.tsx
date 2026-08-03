@@ -23,6 +23,7 @@ import {
   createOptimisticMessage,
   createResponseWaitSnapshot,
   isTerminalActiveRunStatus,
+  shouldCancelStreamOnNavigation,
   shouldClearWaitingForAssistantMessage
 } from './chat-screen-utils'
 import {
@@ -1287,15 +1288,30 @@ export function ChatScreen({
   // the buffered-chunk race, but cancelling here is the cleaner contract
   // (an in-flight response that the user navigated away from is no longer
   // wanted in either session).
-  const navCancelKeyRef = useRef<string | null>(null)
+  const navCancelIdentityRef = useRef<{
+    activeCanonicalKey: string | null
+    activeFriendlyId: string
+    isNewChat: boolean
+  } | null>(null)
   useEffect(() => {
-    const navKey = `${activeCanonicalKey ?? ''}::${isNewChat ? 'new' : activeFriendlyId}`
-    if (navCancelKeyRef.current === null) {
-      navCancelKeyRef.current = navKey
+    const nextIdentity = {
+      activeCanonicalKey: activeCanonicalKey ?? null,
+      activeFriendlyId,
+      isNewChat,
+    }
+    if (navCancelIdentityRef.current === null) {
+      navCancelIdentityRef.current = nextIdentity
       return
     }
-    if (navCancelKeyRef.current !== navKey) {
-      navCancelKeyRef.current = navKey
+    const previousIdentity = navCancelIdentityRef.current
+    navCancelIdentityRef.current = nextIdentity
+    if (
+      shouldCancelStreamOnNavigation(
+        previousIdentity,
+        nextIdentity,
+        activeSendRef.current,
+      )
+    ) {
       cancelStreaming()
     }
   }, [activeCanonicalKey, activeFriendlyId, isNewChat, cancelStreaming])

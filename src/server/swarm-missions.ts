@@ -5,6 +5,7 @@ import type { ParsedSwarmCheckpoint } from './swarm-checkpoints'
 
 export type SwarmMissionAssignmentState = 'queued' | 'dispatched' | 'checkpointed' | 'blocked' | 'needs_input' | 'reviewing' | 'done' | 'cancelled'
 export type SwarmMissionState = 'planning' | 'dispatching' | 'executing' | 'reviewing' | 'blocked' | 'complete' | 'cancelled'
+export type SwarmMissionAssignmentCriticality = 'hard' | 'advisory'
 
 export type SwarmMissionAssignment = {
   id: string
@@ -13,6 +14,7 @@ export type SwarmMissionAssignment = {
   rationale: string | null
   dependsOn: Array<string>
   reviewRequired: boolean
+  criticality: SwarmMissionAssignmentCriticality
   state: SwarmMissionAssignmentState
   dispatchedAt: number | null
   completedAt: number | null
@@ -119,10 +121,11 @@ function reportFromCheckpoint(input: {
 
 function deriveMissionState(assignments: Array<SwarmMissionAssignment>): SwarmMissionState {
   if (assignments.length > 0 && assignments.every((item) => item.state === 'cancelled')) return 'cancelled'
-  if (assignments.some((item) => item.state === 'blocked' || item.state === 'needs_input')) return 'blocked'
-  if (assignments.length > 0 && assignments.every((item) => item.state === 'done' || item.state === 'cancelled' || (item.state === 'checkpointed' && !item.reviewRequired))) return 'complete'
-  if (assignments.some((item) => item.state === 'reviewing' || (item.state === 'checkpointed' && item.reviewRequired))) return 'reviewing'
-  if (assignments.some((item) => item.state === 'dispatched' || item.state === 'checkpointed')) return 'executing'
+  if (assignments.some((item) => item.state === 'dispatched')) return 'executing'
+  if (assignments.some((item) => assignmentCriticality(item) === 'hard' && (item.state === 'blocked' || item.state === 'needs_input'))) return 'blocked'
+  if (assignments.length > 0 && assignments.every(isMissionSatisfied)) return 'complete'
+  if (assignments.some((item) => assignmentCriticality(item) === 'hard' && (item.state === 'reviewing' || (item.state === 'checkpointed' && item.reviewRequired)))) return 'reviewing'
+  if (assignments.some((item) => item.state === 'checkpointed')) return 'executing'
   return 'planning'
 }
 
@@ -133,10 +136,22 @@ function inferReviewRequired(task: string, rationale?: string | null): boolean {
   return /\b(code|patch(?:es|ed|ing)?|implement(?:ation|ed|ing)?|pr|benchmarks?)\b/i.test(`${task} ${rationale ?? ''}`)
 }
 
-const TERMINAL_ASSIGNMENT_STATES = new Set<SwarmMissionAssignmentState>(['done', 'cancelled'])
+function assignmentCriticality(
+  assignment: Pick<SwarmMissionAssignment, 'criticality'>,
+): SwarmMissionAssignmentCriticality {
+  return assignment.criticality === 'advisory' ? 'advisory' : 'hard'
+}
 
 function isTerminalAssignment(assignment: SwarmMissionAssignment): boolean {
-  return TERMINAL_ASSIGNMENT_STATES.has(assignment.state)
+  return isMissionSatisfied(assignment)
+}
+
+function isMissionSatisfied(assignment: SwarmMissionAssignment): boolean {
+  if (assignment.state === 'done' || assignment.state === 'cancelled') return true
+  if (assignmentCriticality(assignment) === 'advisory') {
+    return ['checkpointed', 'blocked', 'needs_input'].includes(assignment.state)
+  }
+  return assignment.state === 'checkpointed' && !assignment.reviewRequired
 }
 
 export function listSwarmMissions(limit = 20): Array<SwarmMission> {
@@ -156,8 +171,10 @@ export function archiveStaleMissions(staleMs: number = 6 * 60 * 60 * 1000): { ar
   for (const mission of store.missions) {
     if (mission.state !== 'executing' && mission.state !== 'planning') continue
     if ((now - mission.updatedAt) < staleMs) continue
-    if (!mission.assignments.every(a => ['done', 'checkpointed', 'blocked', 'needs_input'].includes(a.state))) continue
-    mission.state = 'complete'
+    if (!mission.assignments.every(isTerminalAssignment)) continue
+    const derivedState = deriveMissionState(mission.assignments)
+    if (derivedState !== 'complete' && derivedState !== 'cancelled') continue
+    mission.state = derivedState
     mission.events.push(event('continuation', `Archived as stale (>${Math.round(staleMs / 3600000)}h, all assignments terminal)`))
     archivedIds.push(mission.id)
   }
@@ -172,7 +189,14 @@ export type CreateOrUpdateMissionResult = SwarmMission & { _created?: boolean }
 export function createOrUpdateMission(input: {
   missionId?: string | null
   title: string
-  assignments: Array<{ workerId: string; task: string; rationale?: string | null; dependsOn?: Array<string>; reviewRequired?: boolean }>
+  assignments: Array<{
+    workerId: string
+    task: string
+    rationale?: string | null
+    dependsOn?: Array<string>
+    reviewRequired?: boolean
+    criticality?: SwarmMissionAssignmentCriticality
+  }>
 }): CreateOrUpdateMissionResult {
   const store = readStore()
   const createdAt = now()
@@ -205,6 +229,7 @@ export function createOrUpdateMission(input: {
       rationale: assignment.rationale ?? null,
       dependsOn: assignment.dependsOn ?? [],
       reviewRequired: assignment.reviewRequired ?? inferReviewRequired(assignment.task, assignment.rationale),
+      criticality: assignment.criticality === 'advisory' ? 'advisory' : 'hard',
       state: 'queued',
       dispatchedAt: null,
       completedAt: null,
@@ -380,6 +405,7 @@ export function appendMissionContinuation(input: {
     rationale: input.rationale,
     dependsOn: [],
     reviewRequired: false,
+    criticality: 'hard',
     state: 'queued',
     dispatchedAt: null,
     completedAt: null,

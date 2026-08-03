@@ -1,0 +1,21 @@
+{
+  "orca": "C:\\Users\\madph\\AppData\\Local\\Programs\\OrcaSlicer\\orca-slicer.exe",
+  "profiles": {
+    "machine": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\machine\\Bambu Lab H2D 0.4 nozzle.flattened.json",
+    "process": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\process\\0.20mm Standard _BBL H2D.flattened.json",
+    "filament": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\filament\\h2d-pla-basic.flattened.json"
+  },
+  "models": {
+    "passive-snap-track-plate": {
+      "input": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track-plate.stl",
+      "exit_code": 3221225477,
+      "stdout": "",
+      "stderr": "",
+      "gcode": null,
+      "gcode_bytes": 0,
+      "metadata": {},
+      "passed": false
+    }
+  },
+  "passed": false
+}

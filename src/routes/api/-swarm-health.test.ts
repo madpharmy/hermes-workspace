@@ -30,6 +30,28 @@ describe('swarm-health model/auth readiness', () => {
     expect(events.primaryAuthOk).toBe(false)
   })
 
+  it('ignores auxiliary and MCP authentication warnings', () => {
+    const events = parseModelAuthEventsFromText(`
+2026-07-23 23:35:11,745 WARNING agent.auxiliary_client: Auxiliary Nous client unavailable: no Nous authentication found (run: hermes auth).
+2026-07-25 01:25:58,257 WARNING tools.mcp_tool: MCP server 'comfy-cloud' failed initial OAuth authentication, not retrying automatically: non-interactive environment and no cached tokens found.
+2026-07-25 01:19:19,897 WARNING agent.tool_executor: Tool terminal returned error: curl: (22) The requested URL returned error: 401
+`)
+
+    expect(events.authErrorCount).toBe(0)
+    expect(events.modelAuthStatus).toBe('unknown')
+    expect(events.primaryAuthOk).toBeNull()
+  })
+
+  it('detects an explicit OpenAI Codex unauthorized response', () => {
+    const events = parseModelAuthEventsFromText(
+      '2026-07-25 01:30:00,000 ERROR provider: openai-codex request failed: 401 Unauthorized',
+    )
+
+    expect(events.authErrorCount).toBe(1)
+    expect(events.modelAuthStatus).toBe('primary-auth-failed')
+    expect(events.primaryAuthOk).toBe(false)
+  })
+
   it('marks summary degraded when any worker is falling back', () => {
     const workerBase = {
       displayName: 'Worker',

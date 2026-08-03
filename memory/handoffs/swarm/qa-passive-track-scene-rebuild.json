@@ -1,0 +1,361 @@
+{
+  "schema": "qa.passive-track-blender-scene.v1",
+  "blender": {
+    "version": "5.1.0",
+    "background": true,
+    "filepath": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+  },
+  "scene": {
+    "name": "Scene",
+    "object_type_counts": {
+      "MESH": 116,
+      "LIGHT": 3
+    },
+    "mesh_object_count": 116,
+    "collections": [
+      "Collection"
+    ],
+    "root_collections": [
+      "Collection"
+    ],
+    "unit_settings": {
+      "system": "METRIC",
+      "scale_length": 1.0,
+      "length_unit": "METERS"
+    },
+    "render_engine": "BLENDER_EEVEE",
+    "render_resolution": [
+      1400,
+      900,
+      100
+    ],
+    "render_filepath": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\print-plate.png",
+    "scene_camera": null,
+    "render_visible_mesh_count": 44,
+    "all_mesh_vertices": 230591,
+    "all_mesh_polygons": 435504
+  },
+  "checks": {
+    "tool.blender_scene_load": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": "candidate opens in a fresh background Blender process",
+      "actual": {
+        "filepath": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend",
+        "version": "5.1.0",
+        "background": true
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.required_objects": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": {
+        "required_key_objects": [
+          "LinkMaster",
+          "BBGuideWheel",
+          "BushingGuideWheel",
+          "BBInnerHub",
+          "PassiveTrackFrame",
+          "BBRetainerFront",
+          "BBRetainerRear"
+        ],
+        "assembled_links": 28,
+        "plate_links": 28
+      },
+      "actual": {
+        "required_present": true,
+        "assembled_links": 28,
+        "plate_links": 28
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.units_mm_explicit": {
+      "status": "failed",
+      "hard_gate": true,
+      "expected": {
+        "system": "METRIC",
+        "scale_length": 0.001,
+        "length_unit": "MILLIMETERS"
+      },
+      "actual": {
+        "system": "METRIC",
+        "scale_length": 1.0,
+        "length_unit": "METERS"
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.transforms_finite_and_scaled": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": "finite transforms and unit object scale for mesh objects",
+      "actual": {
+        "nonfinite_transforms": [],
+        "nonunit_scale": []
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.key_geometry_integrity": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": "key parts are one component, manifold, nondegenerate, and outward-oriented",
+      "actual": {
+        "LinkMaster": {
+          "vertices": 2291,
+          "edges": 6867,
+          "polygons": 4578,
+          "components": 1,
+          "non_manifold_edges": 0,
+          "zero_area_faces": 0,
+          "zero_length_edges": 0,
+          "signed_volume": 877.545271,
+          "dimensions": [
+            12.248116,
+            19.999985,
+            9.10003
+          ],
+          "mesh_data_users": 1,
+          "materials": [
+            "TrackGraphite"
+          ],
+          "modifiers": []
+        },
+        "BBGuideWheel": {
+          "vertices": 7069,
+          "edges": 20297,
+          "polygons": 13228,
+          "components": 1,
+          "non_manifold_edges": 0,
+          "zero_area_faces": 0,
+          "zero_length_edges": 0,
+          "signed_volume": 4447.892557,
+          "dimensions": [
+            42.63707,
+            42.637047,
+            12.00239
+          ],
+          "mesh_data_users": 1,
+          "materials": [
+            "GuideOrange"
+          ],
+          "modifiers": []
+        },
+        "BushingGuideWheel": {
+          "vertices": 6850,
+          "edges": 20145,
+          "polygons": 13295,
+          "components": 1,
+          "non_manifold_edges": 0,
+          "zero_area_faces": 0,
+          "zero_length_edges": 0,
+          "signed_volume": 9081.538083,
+          "dimensions": [
+            42.63707,
+            42.637047,
+            12.00239
+          ],
+          "mesh_data_users": 1,
+          "materials": [
+            "GuideOrange"
+          ],
+          "modifiers": []
+        },
+        "BBInnerHub": {
+          "vertices": 512,
+          "edges": 900,
+          "polygons": 388,
+          "components": 1,
+          "non_manifold_edges": 0,
+          "zero_area_faces": 0,
+          "zero_length_edges": 0,
+          "signed_volume": 627.025079,
+          "dimensions": [
+            9.7,
+            9.7,
+            9.0
+          ],
+          "mesh_data_users": 1,
+          "materials": [
+            "BearingCyan"
+          ],
+          "modifiers": []
+        },
+        "PassiveTrackFrame": {
+          "vertices": 7548,
+          "edges": 21782,
+          "polygons": 14230,
+          "components": 1,
+          "non_manifold_edges": 0,
+          "zero_area_faces": 0,
+          "zero_length_edges": 0,
+          "signed_volume": 8147.524796,
+          "dimensions": [
+            99.30912,
+            32.000099,
+            39.490837
+          ],
+          "mesh_data_users": 1,
+          "materials": [
+            "BearingCyan"
+          ],
+          "modifiers": []
+        },
+        "BBRetainerFront": {
+          "vertices": 4164,
+          "edges": 12486,
+          "polygons": 8324,
+          "components": 1,
+          "non_manifold_edges": 0,
+          "zero_area_faces": 0,
+          "zero_length_edges": 0,
+          "signed_volume": 1289.072998,
+          "dimensions": [
+            27.598526,
+            27.598379,
+            6.000141
+          ],
+          "mesh_data_users": 1,
+          "materials": [
+            "BearingCyan"
+          ],
+          "modifiers": []
+        },
+        "BBRetainerRear": {
+          "vertices": 4164,
+          "edges": 12486,
+          "polygons": 8324,
+          "components": 1,
+          "non_manifold_edges": 0,
+          "zero_area_faces": 0,
+          "zero_length_edges": 0,
+          "signed_volume": 1289.108308,
+          "dimensions": [
+            27.598526,
+            27.598379,
+            6.000317
+          ],
+          "mesh_data_users": 1,
+          "materials": [
+            "BearingCyan"
+          ],
+          "modifiers": []
+        }
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.modifier_application": {
+      "status": "verified_with_warnings",
+      "hard_gate": true,
+      "expected": "fabrication candidate has no unapplied modifiers; editable master separately preserves construction stacks",
+      "actual": {
+        "unapplied_modifiers": {},
+        "editable_modifier_master_present": false
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.source_evaluated_export_separation": {
+      "status": "failed",
+      "hard_gate": true,
+      "expected": "semantic source/evaluated/export/plate/reference/camera/light collections exist",
+      "actual": {
+        "collections": [
+          "Collection"
+        ],
+        "missing": [
+          "CAMERAS",
+          "COUPONS",
+          "FABRICATION",
+          "KINEMATIC",
+          "LIGHTS",
+          "MASTER",
+          "PLATE",
+          "PURCHASED_REFERENCE"
+        ]
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.repeated_link_instancing": {
+      "status": "failed",
+      "hard_gate": false,
+      "expected": "repeated presentation and plate links share immutable mesh data",
+      "actual": {
+        "assembled_link_objects": 28,
+        "assembled_unique_meshes": 28,
+        "plate_link_objects": 28,
+        "plate_unique_meshes": 28,
+        "shared_mesh_groups": {}
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.material_assignment": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": "every mesh object has a non-null material",
+      "actual": {
+        "missing_material_objects": []
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    },
+    "scene.default_render_readiness": {
+      "status": "failed",
+      "hard_gate": false,
+      "expected": "fresh reopen has a camera and defaults to the assembled proof, not only the print plate",
+      "actual": {
+        "scene_camera": null,
+        "render_visible_mesh_count": 44,
+        "render_visible_meshes": [
+          "PlateBBInnerHub",
+          "PlateGuideWheel_BB",
+          "PlateGuideWheel_Bushing",
+          "PlateLink_00",
+          "PlateLink_01",
+          "PlateLink_02",
+          "PlateLink_03",
+          "PlateLink_04",
+          "PlateLink_05",
+          "PlateLink_06",
+          "PlateLink_07",
+          "PlateLink_08",
+          "PlateLink_09",
+          "PlateLink_10",
+          "PlateLink_11",
+          "PlateLink_12",
+          "PlateLink_13",
+          "PlateLink_14",
+          "PlateLink_15",
+          "PlateLink_16",
+          "PlateLink_17",
+          "PlateLink_18",
+          "PlateLink_19",
+          "PlateLink_20",
+          "PlateLink_21",
+          "PlateLink_22",
+          "PlateLink_23",
+          "PlateLink_24",
+          "PlateLink_25",
+          "PlateLink_26",
+          "PlateLink_27",
+          "PlatePassiveTrackFrame",
+          "Plate_AxleCap_0",
+          "Plate_AxleCap_1",
+          "Plate_AxleCap_2",
+          "Plate_AxleCap_3",
+          "Plate_BBRetainerFront",
+          "Plate_BBRetainerRear",
+          "Plate_TensionInsert_0.0_front",
+          "Plate_TensionInsert_0.0_rear",
+          "Plate_TensionInsert_1.5_front",
+          "Plate_TensionInsert_1.5_rear",
+          "Plate_TensionInsert_3.0_front",
+          "Plate_TensionInsert_3.0_rear"
+        ]
+      },
+      "evidence": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track.blend"
+    }
+  },
+  "summary": {
+    "verified": 5,
+    "failed": 4,
+    "verified_with_warnings": 1
+  }
+}

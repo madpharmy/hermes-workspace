@@ -3,11 +3,132 @@ import {
   buildHermesChatQueryArgs,
   buildHermesTmuxLaunchCommand,
   buildWorkerPrompt,
+  boundWorkerPrompt,
   checkpointFromRuntimeSnapshot,
+  describeWorkerProcessFailure,
   dispatchBlockReason,
+  mapWithConcurrency,
+  messagesAfterChatBaseline,
+  resolveCheckpointPollSeconds,
+  resolveDispatchLaunchStaggerMs,
+  resolveHermesOneShotLaunch,
   runtimeCheckpointSignature,
+  runtimePatchForDispatchResult,
   runtimeSnapshotIsFresh,
+  selectHermesOneShotBin,
 } from './swarm-dispatch'
+
+describe('resolveDispatchLaunchStaggerMs', () => {
+  it('stagger-starts parallel Windows workers without serializing their execution', () => {
+    expect(resolveDispatchLaunchStaggerMs(0, 'win32')).toBe(0)
+    expect(resolveDispatchLaunchStaggerMs(1, 'win32')).toBe(750)
+    expect(resolveDispatchLaunchStaggerMs(2, 'win32')).toBe(1_500)
+    expect(resolveDispatchLaunchStaggerMs(2, 'linux')).toBe(0)
+  })
+})
+
+describe('resolveHermesOneShotLaunch', () => {
+  it('streams a Windows query through the venv Python process instead of argv', () => {
+    const hermesBin =
+      String.raw`C:\Hermes\venv\Scripts\hermes.exe`
+    const pythonBin =
+      String.raw`C:\Hermes\venv\Scripts\python.exe`
+    const prompt = `sensitive-${'x'.repeat(30_000)}`
+    const launch = resolveHermesOneShotLaunch(hermesBin, prompt, {
+      platform: 'win32',
+      fileExists: (candidate) => candidate === pythonBin,
+    })
+
+    expect(launch.cmd).toBe(pythonBin)
+    expect(launch.args.join(' ')).not.toContain(prompt)
+    expect(launch.stdin).toBe(prompt)
+  })
+
+  it('keeps the normal Hermes argv contract when stdin launching is unavailable', () => {
+    const launch = resolveHermesOneShotLaunch('hermes', 'probe', {
+      platform: 'linux',
+      fileExists: () => false,
+    })
+
+    expect(launch.cmd).toBe('hermes')
+    expect(launch.args).toEqual(buildHermesChatQueryArgs('probe'))
+    expect(launch.stdin).toBeNull()
+  })
+})
+
+describe('selectHermesOneShotBin', () => {
+  it('bypasses Windows command wrappers that execFile cannot launch directly', () => {
+    expect(
+      selectHermesOneShotBin(
+        String.raw`C:\Users\Adam\.local\bin\fabrication.cmd`,
+        String.raw`C:\Hermes\venv\Scripts\hermes.exe`,
+        {
+          platform: 'win32',
+          fileExists: () => true,
+        },
+      ),
+    ).toBe(String.raw`C:\Hermes\venv\Scripts\hermes.exe`)
+  })
+
+  it('retains an installed wrapper on Unix workers', () => {
+    expect(
+      selectHermesOneShotBin('/usr/local/bin/fabrication', '/usr/bin/hermes', {
+        platform: 'linux',
+        fileExists: (candidate) =>
+          candidate === '/usr/local/bin/fabrication',
+      }),
+    ).toBe('/usr/local/bin/fabrication')
+  })
+})
+
+describe('boundWorkerPrompt', () => {
+  it('keeps the assigned task and checkpoint contract within the Windows argv budget', () => {
+    const prompt = [
+      '## Swarm Orchestrator Dispatch',
+      'x'.repeat(30_000),
+      '## Assigned Task',
+      'Verify canonical projection hashes.',
+      '## Required Checkpoint Format',
+      'STATE: DONE | BLOCKED',
+    ].join('\n')
+
+    const bounded = boundWorkerPrompt(prompt, 20_000)
+
+    expect(bounded.length).toBeLessThanOrEqual(20_000)
+    expect(bounded).toContain('Verify canonical projection hashes.')
+    expect(bounded).toContain('## Required Checkpoint Format')
+    expect(bounded).toContain('Startup memory truncated')
+  })
+})
+
+describe('describeWorkerProcessFailure', () => {
+  it('turns a killed process at its deadline into an actionable timeout', () => {
+    const error = Object.assign(new Error('Command failed: very long prompt'), {
+      killed: true,
+      signal: 'SIGTERM',
+    })
+
+    expect(describeWorkerProcessFailure(error, '', 300_100, 300_000)).toBe(
+      'Worker exceeded the 300s execution limit. Retry this assignment with a longer background timeout.',
+    )
+  })
+
+  it('preserves stderr for non-timeout process failures', () => {
+    expect(
+      describeWorkerProcessFailure(new Error('spawn failed'), 'provider rejected request', 25, 300_000),
+    ).toBe('provider rejected request')
+  })
+})
+
+describe('resolveCheckpointPollSeconds', () => {
+  it('allows background checkpoint monitoring to match the worker deadline', () => {
+    expect(resolveCheckpointPollSeconds(900, 900)).toBe(900)
+  })
+
+  it('never outlives the worker execution deadline', () => {
+    expect(resolveCheckpointPollSeconds(1_200, 600)).toBe(600)
+  })
+})
 
 describe('checkpointFromRuntimeSnapshot', () => {
   it('maps runtime lifecycle fields into a structured checkpoint', () => {
@@ -56,6 +177,46 @@ describe('dispatchBlockReason', () => {
   })
 })
 
+describe('runtimePatchForDispatchResult', () => {
+  it('does not overwrite terminal checkpoint state after a successful dispatch', () => {
+    const patch = runtimePatchForDispatchResult({
+      workerId: 'orchestrator',
+      ok: true,
+      output: 'STATE: DONE\nRESULT: SWARM_WINDOWS_OK',
+      error: null,
+      durationMs: 1_000,
+      exitCode: 0,
+      delivery: 'oneshot',
+      checkpointStatus: 'checkpointed',
+    })
+
+    expect(patch).toMatchObject({
+      lastDispatchMode: 'oneshot',
+      lastDispatchResult: 'STATE: DONE\nRESULT: SWARM_WINDOWS_OK',
+    })
+    expect(patch).not.toHaveProperty('state')
+    expect(patch).not.toHaveProperty('checkpointStatus')
+    expect(patch).not.toHaveProperty('blockedReason')
+  })
+})
+
+describe('mapWithConcurrency', () => {
+  it('bounds concurrent workers and preserves assignment order', async () => {
+    let active = 0
+    let peak = 0
+    const results = await mapWithConcurrency([40, 10, 30, 20], 2, async (delay) => {
+      active += 1
+      peak = Math.max(peak, active)
+      await new Promise((resolve) => setTimeout(resolve, delay))
+      active -= 1
+      return delay
+    })
+
+    expect(peak).toBe(2)
+    expect(results).toEqual([40, 10, 30, 20])
+  })
+})
+
 describe('runtimeSnapshotIsFresh', () => {
   it('requires a changed snapshot with post-dispatch activity', () => {
     const baseline = {
@@ -83,6 +244,66 @@ describe('runtimeSnapshotIsFresh', () => {
     }
 
     expect(runtimeSnapshotIsFresh(updated, runtimeCheckpointSignature(baseline), dispatchedAt)).toBe(true)
+  })
+})
+
+describe('messagesAfterChatBaseline', () => {
+  it('accepts only messages after the exact baseline in the same session', () => {
+    const messages = messagesAfterChatBaseline(
+      {
+        ok: true,
+        sessionId: 'session-1',
+        sessionTitle: null,
+        messages: [
+          {
+            id: 'old',
+            role: 'assistant',
+            content: 'STATE: DONE',
+            timestamp: 1_746_000_000,
+          },
+          {
+            id: 'new',
+            role: 'assistant',
+            content: 'STATE: BLOCKED',
+            timestamp: 1_746_000_010,
+          },
+        ],
+      },
+      'session-1',
+      'old',
+      1_746_000_005_000,
+    )
+
+    expect(messages.map((message) => message.id)).toEqual(['new'])
+  })
+
+  it('rejects stale messages when the prior session baseline is unavailable', () => {
+    const messages = messagesAfterChatBaseline(
+      {
+        ok: true,
+        sessionId: 'session-2',
+        sessionTitle: null,
+        messages: [
+          {
+            id: 'stale',
+            role: 'assistant',
+            content: 'STATE: DONE',
+            timestamp: 1_745_999_000,
+          },
+          {
+            id: 'fresh',
+            role: 'assistant',
+            content: 'STATE: BLOCKED',
+            timestamp: 1_746_000_010,
+          },
+        ],
+      },
+      null,
+      null,
+      1_746_000_005_000,
+    )
+
+    expect(messages.map((message) => message.id)).toEqual(['fresh'])
   })
 })
 
@@ -125,6 +346,10 @@ describe('buildHermesChatQueryArgs', () => {
     const args = buildHermesChatQueryArgs(prompt)
 
     expect(args.slice(0, 3)).toEqual(['chat', '-q', prompt])
+    expect(args).not.toContain('--ignore-rules')
+    expect(args).toEqual(
+      expect.arrayContaining(['-Q', '--source', 'swarm-dispatch']),
+    )
     expect(args).toContain('-Q')
     expect(args).toContain('--source')
     expect(args[1]).toBe('-q')
@@ -181,6 +406,28 @@ describe('buildWorkerPrompt', () => {
     expect(prompt).toContain('Worker: Builder — Primary Builder')
     expect(prompt).toContain('## Assigned Task')
     expect(prompt).toContain('Reply with exactly: BUILDER_OK')
+    expect(prompt).toContain('STATE describes whether your assigned lane executed')
+    expect(prompt).toContain('Never omit a label')
+  })
+
+  it('points worker memory instructions at the active Hermes profile tree', () => {
+    const originalHermesHome = process.env.HERMES_HOME
+    process.env.HERMES_HOME = 'C:\\Users\\test\\AppData\\Local\\hermes'
+    try {
+      const prompt = buildWorkerPrompt({
+        workerId: 'swarm5',
+        task: 'Inspect your durable memory.',
+        roster,
+      })
+
+      expect(prompt).toContain(
+        'C:\\Users\\test\\AppData\\Local\\hermes\\profiles\\swarm5\\MEMORY.md',
+      )
+      expect(prompt).not.toContain('~/.hermes/profiles/swarm5')
+    } finally {
+      if (originalHermesHome === undefined) delete process.env.HERMES_HOME
+      else process.env.HERMES_HOME = originalHermesHome
+    }
   })
 
   it('keeps explicit raw/smoke dispatch unwrapped for minimal probes', () => {

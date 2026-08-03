@@ -1,0 +1,28 @@
+{
+  "orca": "C:\\Users\\madph\\AppData\\Local\\Programs\\OrcaSlicer\\orca-slicer.exe",
+  "profiles": {
+    "machine": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\machine\\MyKlipper 0.4 nozzle.flattened.json",
+    "process": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\process\\0.20mm Standard _MyKlipper.flattened.json",
+    "filament": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\filament\\Generic PLA _System.flattened.json"
+  },
+  "models": {
+    "passive-snap-track-plate": {
+      "input": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\passive-snap-track-plate.stl",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "gcode": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-rebuild-20260725-010912\\qa-slices-myklipper\\passive-snap-track-plate\\plate_1.gcode",
+      "gcode_bytes": 15990730,
+      "metadata": {
+        "max_z_mm": 42.6,
+        "filament_used_mm": 17053.99,
+        "filament_used_g": 50.86,
+        "filament_cost": 1.02,
+        "layer_count": 213,
+        "estimated_time": "3h 31m 11s"
+      },
+      "passed": true
+    }
+  },
+  "passed": true
+}

@@ -76,6 +76,8 @@ type MissionSummary = {
   assignments?: Array<MissionAssignment>
 }
 
+type ReportMissionFilter = 'current' | 'all' | string
+
 export type Swarm2ReportRow = {
   id: string
   kind: 'checkpoint' | 'runtime' | 'artifact'
@@ -418,6 +420,48 @@ function buildWorkerReportCards(rows: Array<Swarm2ReportRow>): Array<WorkerRepor
   })
 }
 
+export function buildReportViewModel({
+  missions,
+  rows,
+  missionFilter,
+  workerFilter,
+  stateFilter,
+}: {
+  missions: Array<MissionSummary>
+  rows: Array<Swarm2ReportRow>
+  missionFilter: ReportMissionFilter
+  workerFilter: string
+  stateFilter: ReportState
+}) {
+  const orderedMissions = [...missions].sort((a, b) => b.updatedAt - a.updatedAt)
+  const currentMission =
+    orderedMissions.find((mission) => !['complete', 'cancelled'].includes(mission.state)) ??
+    orderedMissions[0] ??
+    null
+  const resolvedMissionId =
+    missionFilter === 'current'
+      ? currentMission?.id ?? null
+      : missionFilter === 'all'
+        ? null
+        : missionFilter
+  const scopedRows = rows.filter((row) => {
+    if (resolvedMissionId && row.missionId !== resolvedMissionId) return false
+    if (workerFilter !== 'all' && row.workerId !== workerFilter) return false
+    return true
+  })
+  const filteredRows = scopedRows.filter(
+    (row) => stateFilter === 'all' || row.state === stateFilter,
+  )
+  const counts = scopedRows.reduce<Record<Exclude<ReportState, 'all'>, number>>(
+    (acc, row) => {
+      acc[row.state] += 1
+      return acc
+    },
+    { needs_review: 0, ready: 0, blocked: 0, in_progress: 0, artifact: 0 },
+  )
+  return { currentMission, resolvedMissionId, scopedRows, filteredRows, counts }
+}
+
 function detailValue(row: Swarm2ReportRow, label: string): string | null {
   return row.details.find((detail) => detail.label === label)?.value ?? null
 }
@@ -509,7 +553,7 @@ export function Swarm2ReportsView({
   const [stateFilter, setStateFilter] = useState<ReportState>('all')
   const [layout, setLayout] = useState<ReportLayout>('cards')
   const [workerFilter, setWorkerFilter] = useState('all')
-  const [missionFilter, setMissionFilter] = useState('all')
+  const [missionFilter, setMissionFilter] = useState<ReportMissionFilter>('current')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({})
   const [replyErrors, setReplyErrors] = useState<Record<string, string | null>>({})
@@ -529,20 +573,12 @@ export function Swarm2ReportsView({
     () => missions.map((mission) => ({ id: mission.id, label: mission.title || mission.id })),
     [missions],
   )
-  const filteredRows = rows.filter((row) => {
-    if (stateFilter !== 'all' && row.state !== stateFilter) return false
-    if (workerFilter !== 'all' && row.workerId !== workerFilter) return false
-    if (missionFilter !== 'all' && row.missionId !== missionFilter) return false
-    return true
-  })
-  const workerCards = useMemo(() => buildWorkerReportCards(filteredRows), [filteredRows])
-  const counts = rows.reduce<Record<Exclude<ReportState, 'all'>, number>>(
-    (acc, row) => {
-      acc[row.state] += 1
-      return acc
-    },
-    { needs_review: 0, ready: 0, blocked: 0, in_progress: 0, artifact: 0 },
+  const reportView = useMemo(
+    () => buildReportViewModel({ missions, rows, missionFilter, workerFilter, stateFilter }),
+    [missions, rows, missionFilter, workerFilter, stateFilter],
   )
+  const { currentMission, filteredRows, counts } = reportView
+  const workerCards = useMemo(() => buildWorkerReportCards(filteredRows), [filteredRows])
 
   function showToast(message: string) {
     setToastMessage(message)
@@ -770,8 +806,13 @@ export function Swarm2ReportsView({
           {workers.map((worker) => <option key={worker} value={worker}>{worker}</option>)}
         </select>
         <select value={missionFilter} onChange={(event) => setMissionFilter(event.target.value)} className="max-w-xs rounded-full border border-[var(--theme-border)] bg-[var(--theme-bg)] px-3 py-1.5 text-xs text-[var(--theme-muted)] outline-none">
+          <option value="current">
+            {currentMission ? `Current mission — ${currentMission.title}` : 'Current mission'}
+          </option>
           <option value="all">All missions</option>
-          {missionOptions.map((mission) => <option key={mission.id} value={mission.id}>{mission.label}</option>)}
+          {missionOptions
+            .filter((mission) => mission.id !== currentMission?.id)
+            .map((mission) => <option key={mission.id} value={mission.id}>{mission.label}</option>)}
         </select>
         <div className="ml-auto flex rounded-full border border-[var(--theme-border)] bg-[var(--theme-bg)] p-1">
           {([

@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -11,6 +11,14 @@ const tempDirs: string[] = []
 function createAgentDir(prefix: string): string {
   const dir = mkdtempSync(join(tmpdir(), prefix))
   mkdirSync(join(dir, 'webapi'))
+  tempDirs.push(dir)
+  return dir
+}
+
+function createGatewayAgentDir(prefix: string): string {
+  const dir = mkdtempSync(join(tmpdir(), prefix))
+  mkdirSync(join(dir, 'gateway'), { recursive: true })
+  writeFileSync(join(dir, 'gateway', 'run.py'), '')
   tempDirs.push(dir)
   return dir
 }
@@ -42,5 +50,15 @@ describe('resolveClaudeAgentDir', () => {
         CLAUDE_AGENT_PATH: legacyAgentDir,
       }),
     ).toBe(legacyAgentDir)
+  })
+
+  it('recognizes a current Hermes checkout with gateway/run.py', () => {
+    const hermesAgentDir = createGatewayAgentDir('hermes-gateway-')
+
+    expect(
+      resolveClaudeAgentDir({
+        HERMES_AGENT_PATH: hermesAgentDir,
+      }),
+    ).toBe(hermesAgentDir)
   })
 })

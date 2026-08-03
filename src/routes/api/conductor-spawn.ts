@@ -7,19 +7,39 @@ import { isAuthenticated } from '../../server/auth-middleware'
 import { requireJsonContentType } from '../../server/rate-limit'
 import { dashboardFetch, ensureGatewayProbed } from '../../server/gateway-capabilities'
 import { sanitizeConductorMissionGoal } from '../../server/conductor-mission-sanitize'
-import { getSwarmMission, recordMissionCheckpoint  } from '../../server/swarm-missions'
+import {
+  getSwarmMission,
+  listSwarmMissions,
+  recordMissionAssignmentBlocked,
+  recordMissionCheckpoint,
+} from '../../server/swarm-missions'
 import { getSwarmProfilePath } from '../../server/swarm-foundation'
 import { readWorkerMessages } from '../../server/swarm-chat-reader'
 import { newestCheckpointFromMessages } from '../../server/swarm-checkpoints'
-import { checkpointFromRuntimeSnapshot, dispatchSwarmAssignments, readRuntimeCheckpointSnapshot, runtimeCheckpointSignature } from './swarm-dispatch'
+import {
+  buildPrintAnythingSwarmPlan,
+  PrintJobConductorError,
+  readPrintJobProjection,
+  type PrintAnythingSwarmAssignment,
+  type PrintAnythingSwarmPlan,
+} from '../../server/print-job-conductor'
+import {
+  checkpointFromRuntimeSnapshot,
+  dispatchSwarmAssignments,
+  messagesAfterChatBaseline,
+  readRuntimeCheckpointSnapshot,
+  runtimeSnapshotIsFresh,
+} from './swarm-dispatch'
 import type { SwarmMission } from '../../server/swarm-missions'
 
 let cachedSkill: string | null = null
 
 export const NATIVE_CONDUCTOR_MODE_NOTE = 'Native-swarm is the official Workspace-native Swarm fallback when the dashboard Conductor API is unavailable.'
+const NATIVE_DISPATCH_RECOVERY_TIMEOUT_MS = 600_000
 
 type ConductorSpawnBody = {
   goal?: unknown
+  printJobId?: unknown
   orchestratorModel?: unknown
   workerModel?: unknown
   projectsDir?: unknown
@@ -136,6 +156,7 @@ type NativeConductorAssignment = {
   task: string
   rationale: string
   reviewRequired?: boolean
+  criticality?: 'hard' | 'advisory'
   direct?: boolean
   raw?: boolean
 }
@@ -309,25 +330,61 @@ function createNativeConductorMission(input: {
   missionName: string
   maxParallel: number
   supervised: boolean
+  missionTitle?: string
+  assignments?: Array<NativeConductorAssignment | PrintAnythingSwarmAssignment>
 }) {
-  const assignments = buildNativeConductorAssignments(input.goal, {
-    maxParallel: input.maxParallel,
-    supervised: input.supervised,
-  })
-  const missionTitle = `Conductor: ${clipText(input.goal, 120)}`
+  const assignments = input.assignments ?? buildNativeConductorAssignments(input.goal, {
+      maxParallel: input.maxParallel,
+      supervised: input.supervised,
+    })
+  const missionTitle =
+    input.missionTitle ?? `Conductor: ${clipText(input.goal, 120)}`
   void dispatchSwarmAssignments({
     assignments,
     missionId: input.missionName,
     missionTitle,
     allowAsync: true,
-    waitForCheckpoint: false,
+    waitForCheckpoint: true,
+    maxConcurrency: input.maxParallel,
     timeoutSeconds: 600,
-    checkpointPollSeconds: 10,
+    checkpointPollSeconds: 600,
     notifySessionKey: 'main',
   }).catch((error) => {
     console.error('[conductor] native swarm dispatch failed:', error instanceof Error ? error.message : String(error))
   })
   return { missionId: input.missionName, missionTitle, assignments }
+}
+
+export function printAnythingMissionId(
+  plan: Pick<PrintAnythingSwarmPlan, 'jobId' | 'projectionIdentity'>,
+): string {
+  const identity = plan.projectionIdentity
+  return [
+    'print',
+    plan.jobId,
+    identity.manifestSha256.slice(0, 12),
+    identity.stageLedgerSha256.slice(0, 12),
+    identity.pipelineRegistrySha256.slice(0, 12),
+  ].join('-')
+}
+
+export function retryMissionId(missionId: string, now = Date.now()): string {
+  return `${missionId}-retry-${now}`
+}
+
+export function selectReusablePrintAnythingMission(
+  missions: Array<SwarmMission>,
+  missionId: string,
+): SwarmMission | null {
+  const retryPrefix = `${missionId}-retry-`
+  return (
+    missions.find(
+      (mission) =>
+        (mission.id === missionId || mission.id.startsWith(retryPrefix)) &&
+        mission.state !== 'blocked' &&
+        mission.state !== 'cancelled',
+    ) ?? null
+  )
 }
 
 export const Route = createFileRoute('/api/conductor-spawn')({
@@ -343,29 +400,33 @@ export const Route = createFileRoute('/api/conductor-spawn')({
 
         const nativeMission = getSwarmMission(missionId)
         if (nativeMission) {
-          // For active native missions, check worker runtime.json for fresh
-          // checkpoints that haven't been written back to the mission store yet.
-          // This bridges the gap between fire-and-forget dispatch (waitForCheckpoint=false)
-          // and the conductor UI polling for live status.
+          // Monitored dispatch normally writes checkpoints directly. Recovery
+          // accepts only runtime or chat evidence timestamped after dispatch;
+          // an older worker checkpoint cannot complete a newer assignment.
           if (nativeMission.state === 'executing') {
             for (const assignment of nativeMission.assignments) {
               if (assignment.state === 'dispatched' && assignment.workerId) {
                 try {
                   const profilePath = getSwarmProfilePath(assignment.workerId)
-                  // Check runtime.json first
                   const snapshot = readRuntimeCheckpointSnapshot(profilePath)
-                  let checkpoint = checkpointFromRuntimeSnapshot(snapshot)
-
-                  // Also check the worker's chat SQLite DB for checkpoint messages
-                  // (tmux workers write checkpoints there)
-                  if (!checkpoint || checkpoint.stateLabel === 'IN_PROGRESS') {
+                  const fresh = runtimeSnapshotIsFresh(
+                    snapshot,
+                    '__conductor_requires_post_dispatch_runtime_evidence__',
+                    assignment.dispatchedAt ?? nativeMission.updatedAt,
+                  )
+                  let checkpoint = fresh
+                    ? checkpointFromRuntimeSnapshot(snapshot)
+                    : null
+                  if (!checkpoint) {
                     const chat = readWorkerMessages(profilePath, 50)
-                    if (chat.ok) {
-                      const msgCheckpoint = newestCheckpointFromMessages(chat.messages)
-                      if (msgCheckpoint && msgCheckpoint.raw !== snapshot.checkpointRaw) {
-                        checkpoint = msgCheckpoint
-                      }
-                    }
+                    checkpoint = newestCheckpointFromMessages(
+                      messagesAfterChatBaseline(
+                        chat,
+                        null,
+                        null,
+                        assignment.dispatchedAt ?? nativeMission.updatedAt,
+                      ),
+                    )
                   }
 
                   if (checkpoint && (checkpoint.stateLabel === 'DONE' || checkpoint.stateLabel === 'BLOCKED' || checkpoint.stateLabel === 'HANDOFF' || checkpoint.stateLabel === 'NEEDS_INPUT')) {
@@ -375,6 +436,17 @@ export const Route = createFileRoute('/api/conductor-spawn')({
                       workerId: assignment.workerId,
                       checkpoint,
                       source: 'conductor-poll',
+                    })
+                  } else if (
+                    assignment.dispatchedAt
+                    && Date.now() - assignment.dispatchedAt >= NATIVE_DISPATCH_RECOVERY_TIMEOUT_MS
+                  ) {
+                    recordMissionAssignmentBlocked({
+                      missionId: nativeMission.id,
+                      assignmentId: assignment.id,
+                      workerId: assignment.workerId,
+                      reason: 'Workspace restarted or the worker exited without post-dispatch checkpoint evidence before the 600s dispatch limit.',
+                      source: 'conductor-recovery-timeout',
                     })
                   }
                 } catch {
@@ -415,6 +487,7 @@ export const Route = createFileRoute('/api/conductor-spawn')({
 
         try {
           const body = (await request.json().catch(() => ({}))) as ConductorSpawnBody
+          const printJobId = readOptionalString(body.printJobId)
           const rawGoal = readOptionalString(body.goal)
           const goalSanitization = sanitizeConductorMissionGoal(rawGoal)
           const goal = goalSanitization.goal
@@ -423,6 +496,66 @@ export const Route = createFileRoute('/api/conductor-spawn')({
           const projectsDir = readOptionalString(body.projectsDir)
           const maxParallel = readMaxParallel(body.maxParallel)
           const supervised = body.supervised === true
+          if (printJobId) {
+            const plan = buildPrintAnythingSwarmPlan(
+              await readPrintJobProjection(printJobId),
+            )
+            const missionName = printAnythingMissionId(plan)
+            const baseMission = getSwarmMission(missionName)
+            const reusableMission = selectReusablePrintAnythingMission(
+              listSwarmMissions(100),
+              missionName,
+            )
+            if (reusableMission) {
+              return json({
+                ok: true,
+                mode: 'native-swarm',
+                modeOfficialOotb: true,
+                modeNote: NATIVE_CONDUCTOR_MODE_NOTE,
+                prompt: null,
+                missionId: reusableMission.id,
+                sessionKey: null,
+                sessionKeyPrefix: null,
+                jobId: plan.jobId,
+                jobName: plan.title,
+                runId: null,
+                warnings: plan.limitations,
+                assignments: reusableMission.assignments,
+                printPlan: plan,
+                results: null,
+                reused: true,
+              })
+            }
+            const dispatchMissionName = baseMission
+              ? retryMissionId(missionName)
+              : missionName
+            const native = createNativeConductorMission({
+              goal: plan.missionTitle,
+              missionName: dispatchMissionName,
+              missionTitle: plan.missionTitle,
+              maxParallel,
+              supervised,
+              assignments: plan.assignments,
+            })
+            return json({
+              ok: true,
+              mode: 'native-swarm',
+              modeOfficialOotb: true,
+              modeNote: NATIVE_CONDUCTOR_MODE_NOTE,
+              prompt: null,
+              missionId: native.missionId,
+              sessionKey: null,
+              sessionKeyPrefix: null,
+              jobId: plan.jobId,
+              jobName: plan.title,
+              runId: null,
+              warnings: plan.limitations,
+              assignments: native.assignments,
+              printPlan: plan,
+              results: null,
+              reused: false,
+            })
+          }
           if (!goal) {
             return json(
               {
@@ -487,6 +620,15 @@ export const Route = createFileRoute('/api/conductor-spawn')({
             warnings: goalSanitization.warnings,
           })
         } catch (error) {
+          if (error instanceof PrintJobConductorError) {
+            return json(
+              {
+                ok: false,
+                error: { code: error.code, message: error.message },
+              },
+              { status: error.status },
+            )
+          }
           return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 })
         }
       },

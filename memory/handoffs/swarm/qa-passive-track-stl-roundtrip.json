@@ -1,0 +1,251 @@
+{
+  "schema": "qa.passive-track-stl-roundtrip.v1",
+  "blender_version": "5.1.0",
+  "candidate": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined",
+  "files": {
+    "replacement-link.stl": {
+      "status": "verified",
+      "source_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 2291,
+            "edges": 6867,
+            "polygons": 4578,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 0,
+            "dimensions": [
+              12.248116,
+              19.999985,
+              9.10003
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "replacement-link"
+        ]
+      },
+      "roundtrip_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 2291,
+            "edges": 6867,
+            "polygons": 4578,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 0,
+            "dimensions": [
+              12.248116,
+              19.999985,
+              9.10003
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "replacement-link"
+        ]
+      },
+      "same_geometry_signature": true,
+      "clean_manifold": true,
+      "roundtrip_path": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-stl-roundtrip\\replacement-link.stl"
+    },
+    "bb-guide-wheel.stl": {
+      "status": "verified",
+      "source_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 7069,
+            "edges": 21207,
+            "polygons": 14138,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 0,
+            "dimensions": [
+              42.63707,
+              12.00239,
+              42.637047
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "bb-guide-wheel"
+        ]
+      },
+      "roundtrip_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 7069,
+            "edges": 21207,
+            "polygons": 14138,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 0,
+            "dimensions": [
+              42.63707,
+              12.00239,
+              42.637047
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "bb-guide-wheel"
+        ]
+      },
+      "same_geometry_signature": true,
+      "clean_manifold": true,
+      "roundtrip_path": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-stl-roundtrip\\bb-guide-wheel.stl"
+    },
+    "bushing-guide-wheel.stl": {
+      "status": "verified",
+      "source_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 6850,
+            "edges": 20550,
+            "polygons": 13700,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 0,
+            "dimensions": [
+              42.63707,
+              12.00239,
+              42.637047
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "bushing-guide-wheel"
+        ]
+      },
+      "roundtrip_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 6850,
+            "edges": 20550,
+            "polygons": 13700,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 0,
+            "dimensions": [
+              42.63707,
+              12.00239,
+              42.637047
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "bushing-guide-wheel"
+        ]
+      },
+      "same_geometry_signature": true,
+      "clean_manifold": true,
+      "roundtrip_path": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-stl-roundtrip\\bushing-guide-wheel.stl"
+    },
+    "bb-cartridge-print-parts.stl": {
+      "status": "verified",
+      "source_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 15909,
+            "edges": 47715,
+            "polygons": 31810,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 0,
+            "dimensions": [
+              42.63707,
+              24.000282,
+              42.637047
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "bb-cartridge-print-parts"
+        ]
+      },
+      "roundtrip_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 15909,
+            "edges": 47715,
+            "polygons": 31810,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 0,
+            "dimensions": [
+              42.63707,
+              24.000282,
+              42.637047
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "bb-cartridge-print-parts"
+        ]
+      },
+      "same_geometry_signature": true,
+      "clean_manifold": true,
+      "roundtrip_path": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-stl-roundtrip\\bb-cartridge-print-parts.stl"
+    },
+    "passive-snap-track-plate.stl": {
+      "status": "failed",
+      "source_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 99191,
+            "edges": 297405,
+            "polygons": 198270,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 2,
+            "dimensions": [
+              181.246902,
+              208.000015,
+              42.637047
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "passive-snap-track-plate"
+        ]
+      },
+      "roundtrip_import": {
+        "object_count": 1,
+        "objects": [
+          {
+            "vertices": 99191,
+            "edges": 297405,
+            "polygons": 198270,
+            "non_manifold_edges": 0,
+            "degenerate_faces": 2,
+            "dimensions": [
+              181.246902,
+              208.000015,
+              42.637047
+            ],
+            "finite_transform": true
+          }
+        ],
+        "selected_names": [
+          "passive-snap-track-plate"
+        ]
+      },
+      "same_geometry_signature": true,
+      "clean_manifold": false,
+      "roundtrip_path": "C:\\Users\\madph\\AppData\\Local\\Temp\\qa-passive-track-stl-roundtrip\\passive-snap-track-plate.stl"
+    }
+  },
+  "summary": {
+    "verified": 4,
+    "failed": 1
+  }
+}

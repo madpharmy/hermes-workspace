@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import * as yaml from 'yaml'
-import { syncSwarmProfileIdentity, syncSwarmProfileModel } from './swarm-profile-config'
+import { ensureSwarmProfileConfig, syncSwarmProfileIdentity, syncSwarmProfileModel } from './swarm-profile-config'
 
 function makeProfile(initial: Record<string, unknown>): string {
   const dir = mkdtempSync(join(tmpdir(), 'swarm-profile-cfg-'))
@@ -174,6 +174,39 @@ describe('syncSwarmProfileIdentity', () => {
       expect(identity).toContain('The worker ID is a stable machine identifier only')
     } finally {
       rmSync(dir, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('ensureSwarmProfileConfig', () => {
+  it('bootstraps a new worker from the active Hermes root instead of legacy ~/.hermes state', () => {
+    const tempRoot = mkdtempSync(join(tmpdir(), 'swarm-profile-bootstrap-'))
+    const originalHermesHome = process.env.HERMES_HOME
+    const hermesRoot = join(tempRoot, 'AppData', 'Local', 'hermes')
+    const activeProfile = join(hermesRoot, 'profiles', 'hermhub')
+    const workerProfile = join(hermesRoot, 'profiles', 'km-agent')
+    try {
+      mkdirSync(activeProfile, { recursive: true })
+      mkdirSync(workerProfile, { recursive: true })
+      writeFileSync(join(hermesRoot, 'config.yaml'), 'model:\n  provider: openai-codex\n  default: gpt-5.6-sol\n', 'utf8')
+      writeFileSync(join(hermesRoot, 'auth.json'), '{"source":"active-root"}\n', 'utf8')
+      writeFileSync(join(workerProfile, 'auth.json'), '{"source":"legacy-wrong-root"}\n', 'utf8')
+      process.env.HERMES_HOME = activeProfile
+
+      const result = ensureSwarmProfileConfig(workerProfile)
+
+      expect(result.ok).toBe(true)
+      expect(result.configCreated).toBe(true)
+      expect(readFileSync(join(workerProfile, 'config.yaml'), 'utf8')).toContain('openai-codex')
+      expect(readFileSync(join(workerProfile, 'auth.json'), 'utf8')).toContain('active-root')
+      expect(
+        readdirSync(workerProfile).some((name) => name.startsWith('auth.json.profile-local.bak-')),
+      ).toBe(true)
+      expect(existsSync(join(tempRoot, '.hermes', 'config.yaml'))).toBe(false)
+    } finally {
+      if (originalHermesHome === undefined) delete process.env.HERMES_HOME
+      else process.env.HERMES_HOME = originalHermesHome
+      rmSync(tempRoot, { recursive: true, force: true })
     }
   })
 })

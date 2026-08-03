@@ -1,6 +1,15 @@
 # Hermes Workspace Agent Contract
 
-This workspace uses semantic Hermes swarm workers, not numbered-only lanes. The source of truth for routing is `swarm.yaml`; each worker also has a matching profile under `~/.hermes/profiles/<worker-id>/`, a role skill `<worker-id>-core`, and a wrapper in `~/.local/bin/`.
+This workspace uses semantic Hermes swarm workers, not numbered-only lanes. The source of truth for routing is `swarm.yaml`; each worker also has a matching profile under `~/.hermes/profiles/<worker-id>/` and a role skill `<worker-id>-core`. A configured wrapper must resolve under `~/.local/bin/`; workers without a wrapper use the supported Hermes CLI one-shot fallback.
+
+## Native project boards
+
+`swarm.yaml` remains authoritative for this application's custom Swarm UI.
+Native Hermes Kanban is a separate durable control plane. The local portfolio
+boards, shared profile roles, explicit workspace rules, and approval gates are
+documented in `../HERMES_WORKPLACE.md`; their runtime state lives under the
+active Hermes home's `kanban/` directory. Do not mirror board task state into
+`swarm.yaml` or treat custom Swarm runtime files as native Kanban state.
 
 ## Current semantic roster
 
@@ -9,6 +18,7 @@ This workspace uses semantic Hermes swarm workers, not numbered-only lanes. The 
 | `orchestrator` | `orchestrator:plan` | todo, kanban, delegation, terminal, file, gbrain, session_search, cronjob, skills, clarify, web | orchestrator-core, gstack-for-hermes, gbrain, kanban-orchestrator, subagent-driven-development, writing-plans, requesting-code-review, workspace-dispatch | gbrain | none |
 | `km-agent` | `km:health` | gbrain, file, terminal, session_search, skills, todo, cronjob, web | km-agent-core, gbrain, obsidian-markdown, obsidian-cli, obsidian-bases, json-canvas, gstack-for-hermes | gbrain | none |
 | `builder` | `builder:task` | terminal, file, browser, web, gbrain, session_search, skills, todo | builder-core, gstack-for-hermes, test-driven-development, systematic-debugging, github-pr-workflow, requesting-code-review, codebase-inspection | gbrain | none |
+| `fabrication` | CLI one-shot fallback | terminal, file, browser, vision, skills, todo | fabrication-core, manage-3d-print-recipes | blender, blender-z13, orcaslicer | none |
 | `reviewer` | `reviewer:gate` | terminal, file, web, gbrain, session_search, skills | reviewer-core, requesting-code-review, github-code-review, systematic-debugging, gstack-for-hermes, gbrain, codebase-inspection | gbrain | none |
 | `qa` | `qa:smoke` | browser, terminal, file, vision, gbrain, session_search, skills, web | qa-core, browser-harness-power-use, dogfood, gstack-for-hermes | gbrain | none |
 | `researcher` | `researcher:quick` | gbrain, web, browser, terminal, file, vision, session_search, skills, todo | researcher-core, gbrain, autoresearch, browser-harness-power-use, gstack-for-hermes, researcher-quick, researcher-autoresearch, arxiv, youtube-content, polymarket | gbrain | none |
@@ -21,7 +31,8 @@ This workspace uses semantic Hermes swarm workers, not numbered-only lanes. The 
 
 - Keep `swarm.yaml`, profile `config.yaml`, profile core skills, and wrappers aligned when changing a worker.
 - Prefer GBrain-first lookup for context-sensitive RAZSOC/Hermes/workflow decisions.
-- Builder implements; Reviewer gates; QA verifies behavior; Orchestrator routes and enforces greenlight.
+- Builder implements; Fabrication gates manufacturing evidence; Reviewer gates; QA verifies behavior; Orchestrator routes and enforces greenlight.
+- OrcaSlicer's print-job conductor owns printable-product stage, approval, evidence-tier, and release state. Workspace and its workers may project and route that state but must not create a parallel 3D ledger or start a physical print without explicit authorization.
 - Do not enable optional Hermes plugins globally unless the task explicitly needs them; record plugin/toolset alignment in `swarm.yaml` first.
 - For local Workspace pairing/debugging, treat **one gateway + one dashboard** as canonical: `hermes gateway run` on `:8642` and `hermes dashboard` on `:9119`. Before starting another gateway, verify `curl http://127.0.0.1:3000/api/sessions` (or the active workspace port) first. If Sessions already returns data, refresh/reprobe the UI instead of spawning a duplicate gateway.
 - If the default model is `gpt-5.4` / `openai-codex`, remember that chat depends on a live local Codex CLI login (`codex login`).

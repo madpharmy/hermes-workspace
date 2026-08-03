@@ -15,11 +15,24 @@ NEXT_ACTION: ship it`)
     expect(parsed?.commandsRun).toBe('npm test')
   })
 
-  it('rejects partial checkpoint blocks', () => {
+  it('rejects checkpoints missing decision-bearing fields', () => {
     const parsed = parseSwarmCheckpoint(`STATE: DONE
 FILES_CHANGED: none
 COMMANDS_RUN: none`)
     expect(parsed).toBeNull()
+  })
+
+  it('accepts a decision checkpoint when an evidence-detail field is omitted', () => {
+    const parsed = parseSwarmCheckpoint(`STATE: BLOCKED
+FILES_CHANGED: checkpoint.md
+RESULT: control-plane integrity verified
+BLOCKER: S0 evidence is missing
+NEXT_ACTION: close S0 through the canonical conductor`)
+
+    expect(parsed?.stateLabel).toBe('BLOCKED')
+    expect(parsed?.filesChanged).toBe('checkpoint.md')
+    expect(parsed?.commandsRun).toBeNull()
+    expect(parsed?.blocker).toBe('S0 evidence is missing')
   })
 
   it('maps blocked checkpoints to runtime blocked state', () => {

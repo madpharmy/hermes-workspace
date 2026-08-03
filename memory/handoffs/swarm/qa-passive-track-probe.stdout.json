@@ -1,0 +1,584 @@
+{
+  "schema": "qa.passive-track-baseline.v1",
+  "candidate": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined",
+  "candidate_blend_sha256": "14da57d5c130ba7581b85e6012945c3f7171456222637956f478dfab09d4cf0e",
+  "checks": {
+    "artifact.manifest_integrity": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": true,
+      "actual": true,
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\artifact-manifest.json"
+    },
+    "artifact.report_gates": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": "engineering report passes all declared gates",
+      "actual": {
+        "passed": true,
+        "false_gates": []
+      },
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\engineering-report.json"
+    },
+    "artifact.report_slice_state_consistency": {
+      "status": "failed",
+      "hard_gate": true,
+      "expected": "engineering evidence state agrees with the colocated successful slice report",
+      "actual": {
+        "engineering_evidence_state": "GEOMETRY_VERIFIED pending fresh Orca slice",
+        "slice_passed": true
+      },
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\engineering-report.json; C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\slices-hermetic\\slice-report.json"
+    },
+    "contract.snap_coupon_ladder": {
+      "status": "failed",
+      "hard_gate": true,
+      "expected": [
+        0.0,
+        0.15,
+        0.3,
+        0.45,
+        0.75
+      ],
+      "actual": [
+        0.0,
+        0.15,
+        0.3,
+        0.45,
+        0.6
+      ],
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\print-anything-design-contract.v1.json; C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\engineering-report.json"
+    },
+    "export.replacement_link_round_trip": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": "one watertight component with finite, nondegenerate triangles",
+      "actual": {
+        "bytes": 228984,
+        "triangles": 4578,
+        "unique_vertices_exact": 2291,
+        "bounds_min_mm": [
+          -6.800477,
+          -9.99999,
+          -5.400008
+        ],
+        "bounds_max_mm": [
+          5.447639,
+          9.999994,
+          3.700022
+        ],
+        "dimensions_mm": [
+          12.248116,
+          19.999984,
+          9.10003
+        ],
+        "components_by_shared_vertices": 1,
+        "non_finite_vertex_occurrences": 0,
+        "degenerate_triangles": 0,
+        "duplicate_triangle_instances": 0,
+        "boundary_edges": 0,
+        "non_manifold_edges_gt2": 0,
+        "signed_volume_mm3": 877.5453,
+        "watertight_edge_pairs": true
+      },
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\replacement-link.stl"
+    },
+    "export.production_plate_stl_integrity": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": "all STL shells watertight with no degenerate triangles",
+      "actual": {
+        "bytes": 9913584,
+        "triangles": 198270,
+        "unique_vertices_exact": 99191,
+        "bounds_min_mm": [
+          -103.799263,
+          -57.999989,
+          0.0
+        ],
+        "bounds_max_mm": [
+          77.447639,
+          150.000031,
+          42.637047
+        ],
+        "dimensions_mm": [
+          181.246902,
+          208.000019,
+          42.637047
+        ],
+        "components_by_shared_vertices": 44,
+        "non_finite_vertex_occurrences": 0,
+        "degenerate_triangles": 0,
+        "duplicate_triangle_instances": 0,
+        "boundary_edges": 0,
+        "non_manifold_edges_gt2": 0,
+        "signed_volume_mm3": 52334.522,
+        "watertight_edge_pairs": true
+      },
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\passive-snap-track-plate.stl"
+    },
+    "export.production_3mf_semantics": {
+      "status": "verified",
+      "hard_gate": true,
+      "expected": {
+        "unit": "millimeter",
+        "object_count": 44,
+        "build_item_count": 44
+      },
+      "actual": {
+        "unit": "millimeter",
+        "object_count": 44,
+        "build_item_count": 44,
+        "base_material_count": 3
+      },
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\passive-snap-track-colored.3mf"
+    },
+    "visual.png_encoding": {
+      "status": "verified",
+      "hard_gate": false,
+      "expected": "four nontrivial 1400x900 PNG proof images",
+      "actual": {
+        "assembled-perspective.png": {
+          "bytes": 1199988,
+          "width": 1400,
+          "height": 900
+        },
+        "assembled-side.png": {
+          "bytes": 1026614,
+          "width": 1400,
+          "height": 900
+        },
+        "bb-cartridge-detail.png": {
+          "bytes": 1443995,
+          "width": 1400,
+          "height": 900
+        },
+        "print-plate.png": {
+          "bytes": 1063615,
+          "width": 1400,
+          "height": 900
+        }
+      },
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined"
+    },
+    "manufacturing.hermetic_slice": {
+      "status": "verified_with_warnings",
+      "hard_gate": true,
+      "expected": "fresh generic hermetic slice succeeds; it must not be promoted to H2D production proof",
+      "actual": {
+        "passed": true,
+        "profiles": {
+          "machine": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\machine\\MyKlipper 0.4 nozzle.flattened.json",
+          "process": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\process\\0.20mm Standard _MyKlipper.flattened.json",
+          "filament": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\profiles\\filament\\Generic PLA _System.flattened.json"
+        },
+        "models": {
+          "passive-snap-track-plate": {
+            "input": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\passive-snap-track-plate.stl",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "gcode": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\slices-hermetic\\passive-snap-track-plate\\plate_1.gcode",
+            "gcode_bytes": 15990787,
+            "metadata": {
+              "max_z_mm": 42.6,
+              "filament_used_mm": 17053.99,
+              "filament_used_g": 50.86,
+              "filament_cost": 1.02,
+              "layer_count": 213,
+              "estimated_time": "3h 31m 11s"
+            },
+            "passed": true
+          }
+        }
+      },
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\slices-hermetic\\slice-report.json"
+    },
+    "manufacturing.h2d_production_slice": {
+      "status": "not_run",
+      "hard_gate": true,
+      "expected": "exact H2D/nozzle/plate/material/profile tuple slices and critical layers are reviewed",
+      "actual": "No passing H2D production slice is present in proof-cycle5-refined.",
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined"
+    },
+    "manufacturing.physical_qualification": {
+      "status": "not_run",
+      "hard_gate": true,
+      "expected": "measured coupons plus 500-cycle assembled test pass",
+      "actual": [
+        "No physical print was authorized or observed.",
+        "PLA snap strain, release force, retention, fatigue, wear and whitening are unverified.",
+        "Airsoft BBs are projectile components, not bearing-rated rolling elements.",
+        "The analytic sweep checks nominal rigid geometry; loaded deformation is unverified.",
+        "Walls/infill/top-bottom values are requested slicer settings until confirmed in fresh toolpath preview."
+      ],
+      "evidence": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes\\014-passive-snap-track\\proof-cycle5-refined\\engineering-report.json"
+    }
+  },
+  "manifest": {
+    "assembled-perspective.png": {
+      "exists": true,
+      "bytes_expected": 1199988,
+      "bytes_actual": 1199988,
+      "sha256_expected": "768788c8c2bbf39bf1ee9c21a99b3f49faa964bc01e3405fa86e3968be979c22",
+      "sha256_actual": "768788c8c2bbf39bf1ee9c21a99b3f49faa964bc01e3405fa86e3968be979c22"
+    },
+    "assembled-side.png": {
+      "exists": true,
+      "bytes_expected": 1026614,
+      "bytes_actual": 1026614,
+      "sha256_expected": "fc9d272c0fdaf3f4d4138563d19d3fcbf7da981fab2575955796ebd063802b8e",
+      "sha256_actual": "fc9d272c0fdaf3f4d4138563d19d3fcbf7da981fab2575955796ebd063802b8e"
+    },
+    "bb-cartridge-detail.png": {
+      "exists": true,
+      "bytes_expected": 1443995,
+      "bytes_actual": 1443995,
+      "sha256_expected": "f73171fc652f45828cb0033dd3644fd909322d0fbffbcfa887078718c5422685",
+      "sha256_actual": "f73171fc652f45828cb0033dd3644fd909322d0fbffbcfa887078718c5422685"
+    },
+    "bb-cartridge-print-parts.stl": {
+      "exists": true,
+      "bytes_expected": 1590584,
+      "bytes_actual": 1590584,
+      "sha256_expected": "f93dac11a36c3f191585a0090717faf6b814a91d13fa9b6c92203f377fcb3656",
+      "sha256_actual": "f93dac11a36c3f191585a0090717faf6b814a91d13fa9b6c92203f377fcb3656"
+    },
+    "bb-guide-wheel.stl": {
+      "exists": true,
+      "bytes_expected": 706984,
+      "bytes_actual": 706984,
+      "sha256_expected": "cc8639e42d49be921b8820208673106e7e004ee3664c7de1f94adc521d75de27",
+      "sha256_actual": "cc8639e42d49be921b8820208673106e7e004ee3664c7de1f94adc521d75de27"
+    },
+    "bushing-guide-wheel.stl": {
+      "exists": true,
+      "bytes_expected": 685084,
+      "bytes_actual": 685084,
+      "sha256_expected": "5775b739fc76ef1ea21234a6ef147762bd4e26ffe6249d3662868ae095a126a9",
+      "sha256_actual": "5775b739fc76ef1ea21234a6ef147762bd4e26ffe6249d3662868ae095a126a9"
+    },
+    "engineering-report.json": {
+      "exists": true,
+      "bytes_expected": 24428,
+      "bytes_actual": 24428,
+      "sha256_expected": "152304d83a608004d4a8ca50225974e29d589366398584b908d0a4d83dfd40bf",
+      "sha256_actual": "152304d83a608004d4a8ca50225974e29d589366398584b908d0a4d83dfd40bf"
+    },
+    "passive-snap-track-colored.3mf": {
+      "exists": true,
+      "bytes_expected": 2613690,
+      "bytes_actual": 2613690,
+      "sha256_expected": "facbbd19fc928182ee5070cd9b0af74fb5a66987c687d4472be3bb3185910902",
+      "sha256_actual": "facbbd19fc928182ee5070cd9b0af74fb5a66987c687d4472be3bb3185910902"
+    },
+    "passive-snap-track-plate.stl": {
+      "exists": true,
+      "bytes_expected": 9913584,
+      "bytes_actual": 9913584,
+      "sha256_expected": "a0404772ee97159985ae707380b9c1b974f7738447bfce8719ab3b2aabdabfa7",
+      "sha256_actual": "a0404772ee97159985ae707380b9c1b974f7738447bfce8719ab3b2aabdabfa7"
+    },
+    "passive-snap-track.blend": {
+      "exists": true,
+      "bytes_expected": 4026947,
+      "bytes_actual": 4026947,
+      "sha256_expected": "14da57d5c130ba7581b85e6012945c3f7171456222637956f478dfab09d4cf0e",
+      "sha256_actual": "14da57d5c130ba7581b85e6012945c3f7171456222637956f478dfab09d4cf0e"
+    },
+    "print-plate.png": {
+      "exists": true,
+      "bytes_expected": 1063615,
+      "bytes_actual": 1063615,
+      "sha256_expected": "253d73ab5330569e5bf8b43ad54a0f510e7d05642cad6313db69a6572c0e9741",
+      "sha256_actual": "253d73ab5330569e5bf8b43ad54a0f510e7d05642cad6313db69a6572c0e9741"
+    },
+    "replacement-link.stl": {
+      "exists": true,
+      "bytes_expected": 228984,
+      "bytes_actual": 228984,
+      "sha256_expected": "cfc8ffa9795a792919ff92ab921f787552a85aa059f42c53e5dae1a12961064b",
+      "sha256_actual": "cfc8ffa9795a792919ff92ab921f787552a85aa059f42c53e5dae1a12961064b"
+    },
+    "snap-and-race-coupons-colored.3mf": {
+      "exists": true,
+      "bytes_expected": 638894,
+      "bytes_actual": 638894,
+      "sha256_expected": "f881c83c1c263bb7acfd6e2211b84ffbe9d1be5763d43b14ad30effc702fe5b5",
+      "sha256_actual": "f881c83c1c263bb7acfd6e2211b84ffbe9d1be5763d43b14ad30effc702fe5b5"
+    }
+  },
+  "stls": {
+    "replacement-link.stl": {
+      "bytes": 228984,
+      "triangles": 4578,
+      "unique_vertices_exact": 2291,
+      "bounds_min_mm": [
+        -6.800477,
+        -9.99999,
+        -5.400008
+      ],
+      "bounds_max_mm": [
+        5.447639,
+        9.999994,
+        3.700022
+      ],
+      "dimensions_mm": [
+        12.248116,
+        19.999984,
+        9.10003
+      ],
+      "components_by_shared_vertices": 1,
+      "non_finite_vertex_occurrences": 0,
+      "degenerate_triangles": 0,
+      "duplicate_triangle_instances": 0,
+      "boundary_edges": 0,
+      "non_manifold_edges_gt2": 0,
+      "signed_volume_mm3": 877.5453,
+      "watertight_edge_pairs": true
+    },
+    "bb-guide-wheel.stl": {
+      "bytes": 706984,
+      "triangles": 14138,
+      "unique_vertices_exact": 7069,
+      "bounds_min_mm": [
+        -60.97308,
+        -6.001135,
+        -21.318516
+      ],
+      "bounds_max_mm": [
+        -18.33601,
+        6.001255,
+        21.318529
+      ],
+      "dimensions_mm": [
+        42.63707,
+        12.002389,
+        42.637045
+      ],
+      "components_by_shared_vertices": 1,
+      "non_finite_vertex_occurrences": 0,
+      "degenerate_triangles": 0,
+      "duplicate_triangle_instances": 0,
+      "boundary_edges": 0,
+      "non_manifold_edges_gt2": 0,
+      "signed_volume_mm3": 4447.8925,
+      "watertight_edge_pairs": true
+    },
+    "bushing-guide-wheel.stl": {
+      "bytes": 685084,
+      "triangles": 13700,
+      "unique_vertices_exact": 6850,
+      "bounds_min_mm": [
+        18.33601,
+        -6.001135,
+        -21.318516
+      ],
+      "bounds_max_mm": [
+        60.97308,
+        6.001255,
+        21.318529
+      ],
+      "dimensions_mm": [
+        42.63707,
+        12.002389,
+        42.637045
+      ],
+      "components_by_shared_vertices": 1,
+      "non_finite_vertex_occurrences": 0,
+      "degenerate_triangles": 0,
+      "duplicate_triangle_instances": 0,
+      "boundary_edges": 0,
+      "non_manifold_edges_gt2": 0,
+      "signed_volume_mm3": 9081.5381,
+      "watertight_edge_pairs": true
+    },
+    "bb-cartridge-print-parts.stl": {
+      "bytes": 1590584,
+      "triangles": 31810,
+      "unique_vertices_exact": 15909,
+      "bounds_min_mm": [
+        -60.97308,
+        -12.000141,
+        -21.318516
+      ],
+      "bounds_max_mm": [
+        -18.33601,
+        12.000141,
+        21.318529
+      ],
+      "dimensions_mm": [
+        42.63707,
+        24.000282,
+        42.637045
+      ],
+      "components_by_shared_vertices": 4,
+      "non_finite_vertex_occurrences": 0,
+      "degenerate_triangles": 0,
+      "duplicate_triangle_instances": 0,
+      "boundary_edges": 0,
+      "non_manifold_edges_gt2": 0,
+      "signed_volume_mm3": 7653.0988,
+      "watertight_edge_pairs": true
+    },
+    "passive-snap-track-plate.stl": {
+      "bytes": 9913584,
+      "triangles": 198270,
+      "unique_vertices_exact": 99191,
+      "bounds_min_mm": [
+        -103.799263,
+        -57.999989,
+        0.0
+      ],
+      "bounds_max_mm": [
+        77.447639,
+        150.000031,
+        42.637047
+      ],
+      "dimensions_mm": [
+        181.246902,
+        208.000019,
+        42.637047
+      ],
+      "components_by_shared_vertices": 44,
+      "non_finite_vertex_occurrences": 0,
+      "degenerate_triangles": 0,
+      "duplicate_triangle_instances": 0,
+      "boundary_edges": 0,
+      "non_manifold_edges_gt2": 0,
+      "signed_volume_mm3": 52334.522,
+      "watertight_edge_pairs": true
+    }
+  },
+  "three_mf": {
+    "passive-snap-track-colored.3mf": {
+      "bytes": 2613690,
+      "zip_members": [
+        "3D/3dmodel.model",
+        "[Content_Types].xml",
+        "_rels/.rels"
+      ],
+      "missing_required_members": [],
+      "unit": "millimeter",
+      "object_count": 44,
+      "object_names": [
+        "PlateLink_00",
+        "PlateLink_01",
+        "PlateLink_02",
+        "PlateLink_03",
+        "PlateLink_04",
+        "PlateLink_05",
+        "PlateLink_06",
+        "PlateLink_07",
+        "PlateLink_08",
+        "PlateLink_09",
+        "PlateLink_10",
+        "PlateLink_11",
+        "PlateLink_12",
+        "PlateLink_13",
+        "PlateLink_14",
+        "PlateLink_15",
+        "PlateLink_16",
+        "PlateLink_17",
+        "PlateLink_18",
+        "PlateLink_19",
+        "PlateLink_20",
+        "PlateLink_21",
+        "PlateLink_22",
+        "PlateLink_23",
+        "PlateLink_24",
+        "PlateLink_25",
+        "PlateLink_26",
+        "PlateLink_27",
+        "PlateGuideWheel_BB",
+        "PlateGuideWheel_Bushing",
+        "PlateBBInnerHub",
+        "PlatePassiveTrackFrame",
+        "Plate_BBRetainerFront",
+        "Plate_BBRetainerRear",
+        "Plate_AxleCap_0",
+        "Plate_AxleCap_1",
+        "Plate_AxleCap_2",
+        "Plate_AxleCap_3",
+        "Plate_TensionInsert_0.0_front",
+        "Plate_TensionInsert_0.0_rear",
+        "Plate_TensionInsert_1.5_front",
+        "Plate_TensionInsert_1.5_rear",
+        "Plate_TensionInsert_3.0_front",
+        "Plate_TensionInsert_3.0_rear"
+      ],
+      "base_material_count": 3,
+      "display_colors": [
+        "#0E1318FF",
+        "#F24009FF",
+        "#058CC2FF"
+      ],
+      "build_item_count": 44,
+      "vertex_count": 99191,
+      "triangle_count": 198270
+    },
+    "snap-and-race-coupons-colored.3mf": {
+      "bytes": 638894,
+      "zip_members": [
+        "3D/3dmodel.model",
+        "[Content_Types].xml",
+        "_rels/.rels"
+      ],
+      "missing_required_members": [],
+      "unit": "millimeter",
+      "object_count": 15,
+      "object_names": [
+        "SnapCouponA_0.00",
+        "SnapCouponB_0.00",
+        "SnapCouponA_0.15",
+        "SnapCouponB_0.15",
+        "SnapCouponA_0.30",
+        "SnapCouponB_0.30",
+        "SnapCouponA_0.45",
+        "SnapCouponB_0.45",
+        "SnapCouponA_0.60",
+        "SnapCouponB_0.60",
+        "BBRaceCoupon_0.00",
+        "BBRaceCoupon_0.10",
+        "BBRaceCoupon_0.20",
+        "BBRaceCoupon_0.35",
+        "BBRaceCoupon_0.60"
+      ],
+      "base_material_count": 1,
+      "display_colors": [
+        "#F5AD08FF"
+      ],
+      "build_item_count": 15,
+      "vertex_count": 24910,
+      "triangle_count": 49780
+    }
+  },
+  "pngs": {
+    "assembled-perspective.png": {
+      "bytes": 1199988,
+      "width": 1400,
+      "height": 900
+    },
+    "assembled-side.png": {
+      "bytes": 1026614,
+      "width": 1400,
+      "height": 900
+    },
+    "bb-cartridge-detail.png": {
+      "bytes": 1443995,
+      "width": 1400,
+      "height": 900
+    },
+    "print-plate.png": {
+      "bytes": 1063615,
+      "width": 1400,
+      "height": 900
+    }
+  },
+  "summary": {
+    "verified": 6,
+    "failed": 2,
+    "verified_with_warnings": 1,
+    "not_run": 2
+  }
+}

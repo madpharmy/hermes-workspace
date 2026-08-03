@@ -1,0 +1,197 @@
+{
+  "schema": "qa.tank-track-browser-smoke.v1",
+  "url": "http://127.0.0.1:3000/swarm",
+  "title": "Swarm — Hermes Workspace",
+  "regionText": "ORCA CONDUCTOR • READ-ONLY\nStage, approval, evidence, and release state comes directly from print-anything-job-projection.v1. Board cards cannot advance it.\n1 canonical job\nContract healthy; broader pipeline migration is still incomplete.\nHermes Workspace print-pipeline integration proof\nhermes-workspace-integration-20260725 • 2e20925a38\nNOT RELEASED\nEvidence\nCONCEPT\nNext gate\nS0\nStages\n0/12\nledger valid\nmodel gated\n0 provider runs\nRoute bounded swarm",
+  "buttons": [
+    "Route bounded swarm"
+  ],
+  "inputs": [],
+  "links": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "pageErrors": [],
+  "failedResponses": [
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:3000/api/commands",
+      "resourceType": "fetch"
+    }
+  ],
+  "screenshotPath": "C:\\Users\\madph\\Documents\\Projects\\hermes-workspace\\memory\\handoffs\\swarm\\qa-tank-track-swarm-board.png"
+}

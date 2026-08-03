@@ -10,6 +10,40 @@ export type ResponseWaitSnapshot = {
   lastAssistantId: string | null
 }
 
+export type ChatNavigationIdentity = {
+  activeCanonicalKey: string | null
+  activeFriendlyId: string
+  isNewChat: boolean
+}
+
+export type ActiveSendIdentity = {
+  sessionKey: string
+  friendlyId: string
+}
+
+function navigationIdentityKey(identity: ChatNavigationIdentity): string {
+  return `${identity.activeCanonicalKey ?? ''}::${identity.isNewChat ? 'new' : identity.activeFriendlyId}`
+}
+
+export function shouldCancelStreamOnNavigation(
+  previous: ChatNavigationIdentity,
+  next: ChatNavigationIdentity,
+  activeSend: ActiveSendIdentity | null,
+): boolean {
+  if (navigationIdentityKey(previous) === navigationIdentityKey(next)) {
+    return false
+  }
+  if (!activeSend || next.isNewChat) return true
+
+  const nextKeys = [next.activeCanonicalKey, next.activeFriendlyId].filter(
+    (value): value is string => Boolean(value),
+  )
+  return !nextKeys.some(
+    (value) =>
+      value === activeSend.sessionKey || value === activeSend.friendlyId,
+  )
+}
+
 export function isTerminalActiveRunStatus(status: unknown): boolean {
   return (
     typeof status === 'string' &&

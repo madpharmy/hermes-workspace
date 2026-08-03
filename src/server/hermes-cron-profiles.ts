@@ -3,27 +3,10 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, join } from 'node:path'
 import { getHermesRoot, getProfilesDir } from './claude-paths'
+import { resolveHermesCliBin } from './hermes-cli'
 
 const PROFILE_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/
 const JOB_ID_RE = /^[A-Fa-f0-9]{8,64}$/
-
-const HERMES_BIN_CANDIDATES = [
-  process.env.HERMES_CLI_BIN,
-  join(homedir(), '.hermes', 'hermes-agent', 'venv', 'bin', 'hermes'),
-  join(homedir(), '.local', 'bin', 'hermes'),
-  'hermes',
-].filter((value): value is string => Boolean(value))
-
-function resolveHermesBin(): string {
-  for (const candidate of HERMES_BIN_CANDIDATES) {
-    if (candidate.includes('/')) {
-      if (existsSync(candidate)) return candidate
-      continue
-    }
-    return candidate
-  }
-  return 'hermes'
-}
 
 type RawCronJob = Record<string, unknown>
 
@@ -250,7 +233,7 @@ export function createProfileCronJob(
   profile: string,
   input: Record<string, unknown>,
 ): Record<string, unknown> {
-  const output = execFileSync(resolveHermesBin(), normalizeCreateArgs(profile, input), {
+  const output = execFileSync(resolveHermesCliBin(), normalizeCreateArgs(profile, input), {
     encoding: 'utf8',
     timeout: 30_000,
   })
@@ -276,7 +259,7 @@ export function runProfileCronAction(
   validateProfileAndMaybeJob(profile, jobId)
   const cliAction = action === 'remove' ? 'remove' : action
   const output = execFileSync(
-    resolveHermesBin(),
+    resolveHermesCliBin(),
     ['--profile', profile, 'cron', cliAction, jobId],
     {
       encoding: 'utf8',
@@ -310,7 +293,7 @@ export function updateProfileCronJob(
       ? String(updates.repeat)
       : null
   if (repeat) args.push('--repeat', repeat)
-  const output = execFileSync(resolveHermesBin(), args, {
+  const output = execFileSync(resolveHermesCliBin(), args, {
     encoding: 'utf8',
     timeout: 30_000,
   })

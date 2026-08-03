@@ -157,6 +157,57 @@ workers:
   mcpServers:
   - gbrain
   wrapper: builder:task
+- id: fabrication
+  name: Fabrication
+  role: 3D Fabrication / Manufacturing Evidence Gate
+  specialty: whole-BOM review, mechanical interfaces, material allocation, Blender/Orca validation, slice readiness
+  model: GPT-5.6 Sol
+  mission: Challenge and verify printable-object plans and provider artifacts through the canonical Orca conductor without owning approvals, release, or printer control.
+  profile: fabrication
+  modes:
+  - review
+  - validate
+  tools:
+  - terminal
+  - file
+  - browser
+  - vision
+  - skills
+  - todo
+  skills:
+  - fabrication-core
+  - manage-3d-print-recipes
+  capabilities:
+  - fabrication-analysis
+  - whole-bom-review
+  - mechanical-interface-validation
+  - material-allocation
+  - blender-validation
+  - orca-slice-readiness
+  - evidence-gating
+  preferredTaskTypes:
+  - fabrication
+  - 3d-model
+  - mechanical
+  - printability
+  - slicing
+  - validation
+  greenlightRequiredFor:
+  - model-authoring-before-phase-b
+  - printer-control
+  - physical-print
+  - physical-acceptance
+  - release
+  reviewRequired: true
+  maxConcurrentTasks: 1
+  acceptsBroadcast: true
+  plugins: []
+  pluginToolsets: []
+  mcpServers:
+  - blender
+  - blender-z13
+  - orcaslicer
+  wrapper: fabrication.cmd
 - id: reviewer
   name: Reviewer
   role: Independent Review / Merge Gate

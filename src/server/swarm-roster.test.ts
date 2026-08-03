@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { SwarmRosterSchema, SwarmRosterUpsertSchema, isSwarmWorkerId } from './swarm-roster'
+import {
+  SwarmRosterSchema,
+  SwarmRosterUpsertSchema,
+  isSwarmWorkerId,
+  readSwarmRoster,
+} from './swarm-roster'
 
 describe('swarm roster semantic workers', () => {
   it('accepts both legacy swarm ids and semantic profile ids for upsert', () => {
@@ -64,5 +69,32 @@ describe('swarm roster semantic workers', () => {
       wrapper: 'km:health',
       greenlightRequiredFor: ['delete', 'purge', 'publish'],
     })
+  })
+
+  it('registers the fabrication worker with its deterministic profile surface', () => {
+    const worker = readSwarmRoster(['fabrication']).workers.find(
+      (candidate) => candidate.id === 'fabrication',
+    )
+
+    expect(worker).toMatchObject({
+      id: 'fabrication',
+      profile: 'fabrication',
+      wrapper: 'fabrication.cmd',
+      reviewRequired: true,
+      maxConcurrentTasks: 1,
+    })
+    expect(worker.skills).toEqual(
+      expect.arrayContaining(['fabrication-core', 'manage-3d-print-recipes']),
+    )
+    expect(worker.mcpServers).toEqual(
+      expect.arrayContaining(['blender', 'blender-z13', 'orcaslicer']),
+    )
+    expect(worker.greenlightRequiredFor).toEqual(
+      expect.arrayContaining([
+        'model-authoring-before-phase-b',
+        'physical-print',
+        'release',
+      ]),
+    )
   })
 })

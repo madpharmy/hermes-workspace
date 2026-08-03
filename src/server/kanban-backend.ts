@@ -32,8 +32,8 @@ export type KanbanBackendMeta = {
 }
 
 type KanbanBackend = {
-  meta(): KanbanBackendMeta
-  list(): SwarmKanbanCard[] | Promise<SwarmKanbanCard[]>
+  meta(board?: string): KanbanBackendMeta
+  list(board?: string): SwarmKanbanCard[] | Promise<SwarmKanbanCard[]>
   create(input: CreateSwarmKanbanCardInput): SwarmKanbanCard | Promise<SwarmKanbanCard>
   update(
     cardId: string,
@@ -149,16 +149,44 @@ function env(name: string): string | null {
   return value && value.trim() ? value.trim() : null
 }
 
+const KANBAN_BOARD_SLUG = /^[a-z0-9][a-z0-9._-]{0,79}$/
+
+export function normalizeKanbanBoardSlug(board: string | null | undefined): string {
+  const value = board?.trim() || 'default'
+  if (!KANBAN_BOARD_SLUG.test(value)) {
+    throw new Error('Invalid Kanban board: use lowercase letters, digits, dot, dash, or underscore')
+  }
+  return value
+}
+
 function claudeProfileRoot(): string {
   return getWorkspaceClaudeHome()
 }
 
-function claudeDbPath(): string {
-  return path.join(getClaudeRoot(), 'kanban.db')
+function joinConfiguredPath(root: string, ...parts: Array<string>): string {
+  return root.includes('\\') || /^[a-z]:/i.test(root)
+    ? path.win32.join(root, ...parts)
+    : path.posix.join(root, ...parts)
 }
 
-function claudeWorkspacePath(): string {
-  return path.join(getClaudeRoot(), 'kanban')
+function claudeDbPath(board?: string): string {
+  const slug = normalizeKanbanBoardSlug(board)
+  return slug === 'default'
+    ? joinConfiguredPath(getClaudeRoot(), 'kanban.db')
+    : joinConfiguredPath(
+        getClaudeRoot(),
+        'kanban',
+        'boards',
+        slug,
+        'kanban.db',
+      )
+}
+
+function claudeWorkspacePath(board?: string): string {
+  const slug = normalizeKanbanBoardSlug(board)
+  return slug === 'default'
+    ? joinConfiguredPath(getClaudeRoot(), 'kanban')
+    : joinConfiguredPath(getClaudeRoot(), 'kanban', 'boards', slug)
 }
 
 function claudeCliPath(): string | null {
@@ -181,9 +209,9 @@ function checkClaudeCli(): { ok: boolean; path?: string | null; reason?: string 
   }
 }
 
-function detectClaudeKanban(): ClaudeDetection {
-  const dbPath = claudeDbPath()
-  const workspacePath = claudeWorkspacePath()
+function detectClaudeKanban(board?: string): ClaudeDetection {
+  const dbPath = claudeDbPath(board)
+  const workspacePath = claudeWorkspacePath(board)
   const hasDb = fs.existsSync(dbPath)
   const hasWorkspace = fs.existsSync(workspacePath)
 
@@ -235,8 +263,8 @@ function claudeTaskProjection(): string {
   ].join(' ')
 }
 
-function readClaudeTasks(): ClaudeTaskRow[] {
-  const detection = detectClaudeKanban()
+function readClaudeTasks(board?: string): ClaudeTaskRow[] {
+  const detection = detectClaudeKanban(board)
   if (!detection.available) return []
   const query = [
     'select',
@@ -415,8 +443,8 @@ const localBackend: KanbanBackend = {
 }
 
 const claudeBackend: KanbanBackend = {
-  meta() {
-    const detection = detectClaudeKanban()
+  meta(board) {
+    const detection = detectClaudeKanban(board)
     return {
       id: 'claude',
       label: 'Hermes Kanban',
@@ -428,8 +456,8 @@ const claudeBackend: KanbanBackend = {
         : detection.reason ?? 'Hermes Kanban not detected.',
     }
   },
-  list() {
-    return readClaudeTasks().map(claudeTaskToCard)
+  list(board) {
+    return readClaudeTasks(board).map(claudeTaskToCard)
   },
   create(input) {
     const detection = detectClaudeKanban()
@@ -526,8 +554,8 @@ const dashboardProxyBackend: KanbanBackend = {
         : 'Hermes Dashboard kanban plugin not detected.',
     }
   },
-  async list() {
-    const board = await fetchDashboardKanbanBoard()
+  async list(boardSlug) {
+    const board = await fetchDashboardKanbanBoard(boardSlug)
     const cards: SwarmKanbanCard[] = []
     for (const column of board.columns) {
       for (const task of column.tasks) {
@@ -590,29 +618,32 @@ const dashboardProxyBackend: KanbanBackend = {
  * Set CLAUDE_KANBAN_BACKEND=claude to force the direct-SQLite path during
  * troubleshooting.
  */
-export function resolveKanbanBackend(): KanbanBackend {
+export function resolveKanbanBackend(board?: string): KanbanBackend {
   const preference = (env('CLAUDE_KANBAN_BACKEND') ?? 'auto').toLowerCase()
   if (preference === 'local') return localBackend
   if (preference === 'hermes-proxy' || preference === 'proxy') {
     return getCapabilities().kanban ? dashboardProxyBackend : localBackend
   }
   if (preference === 'claude') {
-    const claudeMeta = claudeBackend.meta()
+    const claudeMeta = claudeBackend.meta(board)
     return claudeMeta.detected ? claudeBackend : localBackend
   }
   // auto
   if (getCapabilities().kanban) return dashboardProxyBackend
-  const claudeMeta = claudeBackend.meta()
+  const claudeMeta = claudeBackend.meta(board)
   if (claudeMeta.detected) return claudeBackend
   return localBackend
 }
 
-export function getKanbanBackendMeta(): KanbanBackendMeta {
-  return resolveKanbanBackend().meta()
+export function getKanbanBackendMeta(board?: string): KanbanBackendMeta {
+  return resolveKanbanBackend(board).meta(board)
 }
 
-export async function listKanbanCards(): Promise<SwarmKanbanCard[]> {
-  return Promise.resolve(resolveKanbanBackend().list())
+export async function listKanbanCards(board?: string): Promise<SwarmKanbanCard[]> {
+  const normalizedBoard = normalizeKanbanBoardSlug(board)
+  return Promise.resolve(
+    resolveKanbanBackend(normalizedBoard).list(normalizedBoard),
+  )
 }
 
 export async function createKanbanCard(

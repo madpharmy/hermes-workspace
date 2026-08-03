@@ -1,0 +1,684 @@
+{
+  "schema": "qa.tank-track-api-smoke.v1",
+  "base": "http://127.0.0.1:3000",
+  "candidate_job_id": "passive-snap-track-20260725",
+  "checks": {
+    "unauthenticated_list": {
+      "status": 401,
+      "body": {
+        "ok": false,
+        "error": {
+          "code": "UNAUTHORIZED",
+          "message": "Unauthorized"
+        }
+      }
+    },
+    "authenticated_list": {
+      "status": 200,
+      "body": {
+        "ok": true,
+        "schema": "print-anything-workspace-projection.v1",
+        "data": [
+          {
+            "jobId": "hermes-workspace-integration-20260725",
+            "jobDir": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir\\print-jobs\\hermes-workspace-integration-20260725",
+            "projection": {
+              "schema": "print-anything-job-projection.v1",
+              "generated_at": "2026-07-25T23:52:13.906939Z",
+              "job_id": "hermes-workspace-integration-20260725",
+              "title": "Hermes Workspace print-pipeline integration proof",
+              "board": "fabrication",
+              "current_stage": "S0",
+              "completion_state": "ACTIVE",
+              "highest_evidence_tier": "CONCEPT",
+              "release": {
+                "status": "NOT_RELEASED",
+                "released_at": null,
+                "artifact_sha256": null
+              },
+              "cycle_budget": {
+                "used": 0,
+                "limit": 5,
+                "exhausted": false
+              },
+              "approvals": {
+                "phase_a": {
+                  "status": "BLOCKED",
+                  "actor": null,
+                  "approved_at": null,
+                  "artifact": null,
+                  "artifact_sha256": null
+                },
+                "phase_b": {
+                  "status": "BLOCKED",
+                  "actor": null,
+                  "approved_at": null,
+                  "artifact": null,
+                  "artifact_sha256": null
+                },
+                "physical": {
+                  "status": "BLOCKED",
+                  "actor": null,
+                  "approved_at": null,
+                  "artifact": null,
+                  "artifact_sha256": null
+                }
+              },
+              "stages": [
+                {
+                  "stage": "S0",
+                  "name": "Intake and authority",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": false
+                },
+                {
+                  "stage": "S1",
+                  "name": "Intent contract",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": false
+                },
+                {
+                  "stage": "S2",
+                  "name": "Functional decomposition",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": false
+                },
+                {
+                  "stage": "S3",
+                  "name": "Route alternatives",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": false
+                },
+                {
+                  "stage": "S4",
+                  "name": "Engineering architecture",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": false
+                },
+                {
+                  "stage": "S5",
+                  "name": "Independent engineering review",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": false
+                },
+                {
+                  "stage": "S6",
+                  "name": "Coupon preparation",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": false
+                },
+                {
+                  "stage": "S7",
+                  "name": "Editable source and fabrication twin",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": false
+                },
+                {
+                  "stage": "S8",
+                  "name": "Digital validation",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": true
+                },
+                {
+                  "stage": "S9",
+                  "name": "Exact manufacturing preflight",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": true
+                },
+                {
+                  "stage": "S10",
+                  "name": "Physical execution and measurements",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": true
+                },
+                {
+                  "stage": "S11",
+                  "name": "Release review",
+                  "applicable": true,
+                  "verdict": "BLOCKED",
+                  "finding_count": 1,
+                  "evidence_count": 0,
+                  "independent": true
+                }
+              ],
+              "provider_runs": [],
+              "ledger_valid": true,
+              "pipeline_passed": false,
+              "pipeline_registry_sha256": "e41f31c2ef431a4844cf5688be9d780c66ae38f967259debba314e4a7d9e7066",
+              "provider_bindings": {
+                "valid": true,
+                "checked": 0,
+                "errors": []
+              },
+              "pre_model_gate": {
+                "ready": false,
+                "model_start_authorized": false,
+                "errors": [
+                  "S0-S5 are not closed; first blocker=S0, required approval=None",
+                  "job has no compiled semantic contract",
+                  "pre-model baseline is missing",
+                  "Phase A approval is invalid: approval missing",
+                  "Phase B approval is invalid: approval missing"
+                ],
+                "baseline": null,
+                "baseline_sha256": null,
+                "phase_a_approved": false,
+                "phase_b_approved": false,
+                "stages_closed_through": null
+              },
+              "source": {
+                "manifest": "manifest.json",
+                "manifest_sha256": "2e20925a38786f9eb9a114b69a44f12f6178876b780f7e5f2928cb1947b766b7",
+                "stage_ledger": "stage-gates.json",
+                "stage_ledger_sha256": "8b29ef56252ff4d2b156bed77039a942fbb010b47604b83816c18571a575a7dc"
+              },
+              "read_only": true
+            }
+          }
+        ],
+        "errors": [],
+        "pagination": {
+          "page": 1,
+          "pageSize": 20,
+          "totalItems": 1,
+          "totalPages": 1
+        },
+        "doctor": {
+          "schema": "print-anything-pipeline-doctor.v1",
+          "passed": true,
+          "consolidation_complete": false,
+          "registry_sha256": "231523986ddbec306e997368beb5445f6cfdcef4790ea90138ebab73235a987f",
+          "errors": [],
+          "warnings": [
+            "decor-only-design-contract: transitional-adapter remains at C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp\\orcaslicer-mcp\\src\\decor-design-contract.ts",
+            "perfect-ornament-20-cycle: historical-evidence remains at C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\orchestration\\ornament-20-cycle",
+            "method-spikes: historical-evidence remains at C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes",
+            "openclaw-model-forge-copy: legacy-duplicate remains at C:\\Users\\madph\\Documents\\Projects\\openclaw-fleet\\scripts\\python\\model_forge_trellis2_batch.py",
+            "hermes-workspace-3d-operation: historical-evidence remains at C:\\Users\\madph\\Documents\\Projects\\hermes-workspace\\memory\\archive\\3d-model-creation-operation.superseded.md",
+            "migration gap job-core-and-formal-schemas: decision-and-implementation-open",
+            "migration gap conductor-state-machine: implementation-open",
+            "migration gap provider-envelope: execution-routing-open",
+            "migration gap local-model-comparison-runtime: contract-implemented-runtime-open",
+            "migration gap candidate-selection-projection: open",
+            "migration gap workspace-state-projection: canonical-projection-consumer-implemented-completeness-open",
+            "migration gap manufacturing-capability-and-calibration: open",
+            "migration gap recipe-deployment-lifecycle: open",
+            "migration gap observability-and-worker-lifecycle: open",
+            "migration gap model-forge-legacy-removal: blocked-on-evidence",
+            "migration gap method-source-promotion: open",
+            "migration gap artifact-retention: open",
+            "migration gap acceptance-campaign: open"
+          ],
+          "registry": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\.agents\\skills\\build-printable-decor-models\\references\\3d-pipeline-component-registry.v1.json",
+          "canonical_control_plane": {
+            "repository": "orcaslicer",
+            "entrypoint": ".agents/skills/build-printable-decor-models/scripts/print_job_conductor.py",
+            "job_schema": "hermes-print-job.v1",
+            "design_contract_schema": "print-anything-design-contract.v1",
+            "stage_ledger_schema": "print-anything-stage-gates.v1",
+            "provider_invocation_schema": "print-anything-provider-invocation.v1",
+            "provider_result_schema": "print-anything-provider-result.v1",
+            "provider_acceptance_schema": "print-anything-provider-acceptance.v1",
+            "pre_model_plan_schema": "print-anything-pre-model-plan.v1",
+            "pre_model_baseline_schema": "print-anything-pre-model-baseline.v1",
+            "whole_bom_proposal_schema": "print-anything-whole-bom-proposal.v1",
+            "whole_bom_schema_path": ".agents/skills/build-printable-decor-models/schemas/print-anything-whole-bom-proposal.v1.schema.json",
+            "whole_bom_protocol": ".agents/skills/build-printable-decor-models/references/whole-bom-llm-part-proposal-protocol.md",
+            "prevention_and_local_model_plan_schema": "print-anything-prevention-and-local-model-plan.v1",
+            "prevention_and_local_model_schema_path": ".agents/skills/build-printable-decor-models/schemas/print-anything-prevention-and-local-model-plan.v1.schema.json",
+            "defect_prevention_protocol": ".agents/skills/build-printable-decor-models/references/defect-prevention-and-local-model-learning-loop.md",
+            "tank_track_module": ".agents/skills/build-printable-decor-models/references/tank-track-design-and-material-allocation.md",
+            "ui_projection_schema": "print-anything-job-projection.v1",
+            "canonical_run_root": "mcp-workdir/print-jobs",
+            "rule": "Only the conductor-owned job manifest and stage ledger may advance or release a printable-model job. Model authoring requires an S0-S5-closed, zero-gap, hash-bound pre-model baseline with validated whole-BOM and defect-prevention/local-model plans explicitly approved by Adam."
+          },
+          "components": [
+            {
+              "id": "print-job-conductor",
+              "state": "canonical",
+              "owner": "orcaslicer",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\.agents\\skills\\build-printable-decor-models\\scripts\\print_job_conductor.py",
+              "exists": true,
+              "required": true
+            },
+            {
+              "id": "whole-bom-proposal-validator",
+              "state": "canonical",
+              "owner": "orcaslicer",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\.agents\\skills\\build-printable-decor-models\\scripts\\validate_whole_bom_proposal.py",
+              "exists": true,
+              "required": true
+            },
+            {
+              "id": "defect-prevention-local-model-validator",
+              "state": "canonical",
+              "owner": "orcaslicer",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\.agents\\skills\\build-printable-decor-models\\scripts\\validate_prevention_and_local_model_plan.py",
+              "exists": true,
+              "required": true
+            },
+            {
+              "id": "semantic-recipe-planner",
+              "state": "canonical-provider",
+              "owner": "hermhub",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\hermhub\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+              "exists": true,
+              "required": false,
+              "runtime": {
+                "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                "exists": true
+              }
+            },
+            {
+              "id": "model-forge-authoring-provider",
+              "state": "canonical-provider",
+              "owner": "blender_mcp",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\blender_mcp\\scripts\\python\\model_forge_trellis2_batch.py",
+              "exists": true,
+              "required": false
+            },
+            {
+              "id": "concept-image-provider",
+              "state": "canonical-provider",
+              "owner": "codex-imagegen",
+              "path": "C:\\Users\\madph\\.codex\\skills\\.system\\imagegen\\SKILL.md",
+              "exists": true,
+              "required": false
+            },
+            {
+              "id": "local-generative-and-vision-router",
+              "state": "canonical-provider",
+              "owner": "hermhub",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\hermhub\\skills\\mlops\\inference\\hermhub-local-ai\\SKILL.md",
+              "exists": true,
+              "required": false
+            },
+            {
+              "id": "local-vision-evaluation-provider",
+              "state": "canonical-provider",
+              "owner": "hermhub",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\hermhub\\skills\\mlops\\inference\\hermhub-local-ai\\SKILL.md",
+              "exists": true,
+              "required": false
+            },
+            {
+              "id": "trellis-donor-adapter",
+              "state": "canonical-provider-adapter",
+              "owner": "orcaslicer",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\scripts\\model_tool.py",
+              "exists": true,
+              "required": true
+            },
+            {
+              "id": "orca-mcp-manufacturing-provider",
+              "state": "canonical-provider",
+              "owner": "orcaslicer-mcp",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp\\orcaslicer-mcp\\src\\index.ts",
+              "exists": true,
+              "required": true
+            },
+            {
+              "id": "hermes-workspace-control-surface",
+              "state": "control-surface",
+              "owner": "hermes-workspace",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\hermes-workspace",
+              "exists": true,
+              "required": false
+            },
+            {
+              "id": "openclaw-fleet-execution-infrastructure",
+              "state": "infrastructure-provider",
+              "owner": "openclaw-fleet",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\openclaw-fleet\\registry\\nodes.json",
+              "exists": true,
+              "required": false
+            }
+          ],
+          "deployment_groups": [
+            {
+              "id": "hermes-recipe-manager",
+              "canonical_path": "C:\\Users\\madph\\Documents\\Projects\\hermhub\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+              "canonical_sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+              "runtime_copies": [
+                {
+                  "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                  "exists": true,
+                  "sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+                  "matches_canonical": true
+                },
+                {
+                  "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\profiles\\builder\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                  "exists": true,
+                  "sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+                  "matches_canonical": true
+                },
+                {
+                  "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\profiles\\fabrication\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                  "exists": true,
+                  "sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+                  "matches_canonical": true
+                },
+                {
+                  "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\profiles\\km-agent\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                  "exists": true,
+                  "sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+                  "matches_canonical": true
+                },
+                {
+                  "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\profiles\\ops-watch\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                  "exists": true,
+                  "sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+                  "matches_canonical": true
+                },
+                {
+                  "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\profiles\\orchestrator\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                  "exists": true,
+                  "sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+                  "matches_canonical": true
+                },
+                {
+                  "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\profiles\\qa\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                  "exists": true,
+                  "sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+                  "matches_canonical": true
+                },
+                {
+                  "path": "C:\\Users\\madph\\AppData\\Local\\hermes\\profiles\\reviewer\\skills\\creative\\manage-3d-print-recipes\\scripts\\recipe_manager.py",
+                  "exists": true,
+                  "sha256": "4d57baabc9f2e475060933491fc1d30b2a532be920301e57106d275b51e8a928",
+                  "matches_canonical": true
+                }
+              ]
+            }
+          ],
+          "legacy_surfaces": [
+            {
+              "id": "decor-only-design-contract",
+              "state": "transitional-adapter",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp\\orcaslicer-mcp\\src\\decor-design-contract.ts",
+              "present": true,
+              "replacement": "project bounded candidate-selection constraints from print-anything-design-contract.v1",
+              "removal_gate": "all rank_models consumers use a conductor-generated projection"
+            },
+            {
+              "id": "perfect-ornament-20-cycle",
+              "state": "historical-evidence",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\orchestration\\ornament-20-cycle",
+              "present": true,
+              "replacement": "one conductor job with bounded attempts and ordinary art, geometry, slice, and review stages",
+              "removal_gate": "retain immutable accepted evidence; no new jobs or source copies are written here"
+            },
+            {
+              "id": "method-spikes",
+              "state": "historical-evidence",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes",
+              "present": true,
+              "replacement": "registered test fixtures and provider tests invoked from a conductor job",
+              "removal_gate": "promoted reusable code has tests outside its proof-output directory"
+            },
+            {
+              "id": "openclaw-model-forge-copy",
+              "state": "legacy-duplicate",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\openclaw-fleet\\scripts\\python\\model_forge_trellis2_batch.py",
+              "present": true,
+              "replacement": "%USERPROFILE%/Documents/Projects/blender_mcp/scripts/python/model_forge_trellis2_batch.py",
+              "removal_gate": "downstream consumers switched and one end-to-end run is proven from blender_mcp"
+            },
+            {
+              "id": "hermes-workspace-3d-operation",
+              "state": "historical-evidence",
+              "path": "C:\\Users\\madph\\Documents\\Projects\\hermes-workspace\\memory\\archive\\3d-model-creation-operation.superseded.md",
+              "present": true,
+              "replacement": "project the conductor manifest, stage ledger, and provider registry into Workspace",
+              "removal_gate": "retain the archive for provenance; the former operational path is a non-operational tombstone and Workspace maintains no parallel DAG"
+            }
+          ],
+          "artifact_roots": [
+            {
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\mcp-workdir",
+              "present": true,
+              "classification": "generated-or-acquired-artifacts",
+              "policy": "never treat as source and never bulk-delete without a provenance inventory"
+            },
+            {
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\orchestration\\ornament-20-cycle-runs",
+              "present": true,
+              "classification": "historical-run-snapshots",
+              "policy": "deduplicate only after accepted evidence is content-addressed"
+            },
+            {
+              "path": "C:\\Users\\madph\\Documents\\Projects\\orcaslicer\\spikes",
+              "present": true,
+              "classification": "mixed-source-and-proof-output",
+              "policy": "do not add new production jobs; separate reusable source from generated proof before cleanup"
+            }
+          ],
+          "migration_gaps": [
+            {
+              "id": "job-core-and-formal-schemas",
+              "priority": "P0",
+              "state": "decision-and-implementation-open",
+              "owner": "orcaslicer",
+              "depends_on": [],
+              "problem": "The current print-job schemas are executable examples rather than a formally versioned cross-language contract, and the shared boundary between non-print 3D assets and fabrication jobs is not explicit.",
+              "closure": "Approve a neutral 3D job core with a strict conditional fabrication profile, publish formal schemas plus migration rules, and validate shared valid/invalid fixtures in every consumer.",
+              "acceptance": "An approved architecture decision, formal schemas, compatibility matrix, and cross-language contract suite exist without weakening fabrication evidence."
+            },
+            {
+              "id": "conductor-state-machine",
+              "priority": "P0",
+              "state": "implementation-open",
+              "owner": "orcaslicer",
+              "depends_on": [
+                "job-core-and-formal-schemas"
+              ],
+              "problem": "The conductor now blocks model start until a complete S0-S5 pre-model baseline is approved by Adam, but it still validates a manually writable stage ledger and does not exclusively own attempts, evidence attachment, stage verdicts, downstream invalidation, approval revocation, event replay, or release creation.",
+              "closure": "Preserve the implemented pre-model gate while adding an immutable event journal and conductor-only attempt, evidence, evaluation, invalidation, approval-lifecycle, rebuild, resume, and release-manifest operations.",
+              "acceptance": "Materialized job state rebuilds from events; upstream changes reopen dependents; no worker or UI needs to edit the manifest or stage ledger; known-bad transition and hash controls are rejected."
+            },
+            {
+              "id": "provider-envelope",
+              "priority": "P0",
+              "state": "execution-routing-open",
+              "owner": "provider-owners",
+              "depends_on": [
+                "job-core-and-formal-schemas",
+                "conductor-state-machine"
+              ],
+              "problem": "The conductor now creates provider requests, wraps any job-local provider outputs in the common result schema, and validates acceptance, but provider execution surfaces do not yet consume the request/output-root contract automatically.",
+              "closure": "Provide a common runner SDK and teach each provider to consume the request envelope, prove capability/version, and write into its assigned output root without moving provider implementation into the conductor.",
+              "acceptance": "Every active provider has a request-to-accepted-result dry run covering idempotency, timeout/cancel, retry, provenance, logs, output hashes, warnings, and resumability."
+            },
+            {
+              "id": "local-model-comparison-runtime",
+              "priority": "P0-for-local-learning",
+              "state": "contract-implemented-runtime-open",
+              "owner": "orcaslicer-hermhub-and-provider-owners",
+              "depends_on": [
+                "provider-envelope",
+                "observability-and-worker-lifecycle"
+              ],
+              "problem": "The pre-model gate now requires bounded local image-generation, image-analysis, and inference comparison routes, but no common runtime yet fans out the selected local lanes, normalizes their results, persists task-scoped scores, or emits promotion candidates across jobs.",
+              "closure": "Implement a provider-envelope runner that executes applicable local lanes concurrently with timeout, quorum, cancellation, provenance, normalized metrics, preserved losing results, and job-local comparison reports; aggregate reports into a versioned task/hardware/model scoreboard and emit review-only champion promotion candidates.",
+              "acceptance": "Representative generation, vision-grounding, and engineering-inference jobs prove two-lane fan-out, continuation after one advisory failure, hard-requirement blocking only when no valid route remains, reproducible scores, holdout regressions, and reversible champion recommendations without automatic source edits."
+            },
+            {
+              "id": "candidate-selection-projection",
+              "priority": "P0",
+              "state": "open",
+              "owner": "orcaslicer-and-orcaslicer-mcp",
+              "depends_on": [
+                "job-core-and-formal-schemas"
+              ],
+              "problem": "Orca MCP rank_models still accepts the decor-only whole-contract-shaped adapter.",
+              "closure": "Generate a bounded model-selection-constraints projection from the umbrella contract, migrate every consumer, then remove the decor-only adapter.",
+              "acceptance": "All ranking callers use the bounded projection, valid/invalid fixtures pass, and the decor-only adapter and deprecation path are removed."
+            },
+            {
+              "id": "workspace-state-projection",
+              "priority": "P1",
+              "state": "canonical-projection-consumer-implemented-completeness-open",
+              "owner": "hermes-workspace-and-orcaslicer",
+              "depends_on": [
+                "conductor-state-machine"
+              ],
+              "problem": "Hermes Workspace now consumes print-anything-job-projection.v1 through a read-only adapter and routes hash-idempotent, stage-aware swarm work without owning approvals, advancement, release, or printer control. The superseded Workspace 3D operation is archived and its former path is a non-operational tombstone, but the conductor projection does not yet expose attempt, event, worker, evidence, or limitation detail.",
+              "closure": "Extend the canonical projection and event reader with attempt, event, worker, evidence, and limitation detail while keeping all operator mutations behind conductor endpoints.",
+              "acceptance": "Workspace shows canonical stage, attempt, worker, evidence, approval, limitation, and release state and cannot produce a divergent job state."
+            },
+            {
+              "id": "manufacturing-capability-and-calibration",
+              "priority": "P0-for-fabrication",
+              "state": "open",
+              "owner": "orcaslicer-and-operator",
+              "depends_on": [
+                "job-core-and-formal-schemas",
+                "conductor-state-machine"
+              ],
+              "problem": "Installed profiles and cached printer identities do not establish the exact physical printer, firmware, tools, plate, material paths, filament lots, calibration tuples, or production readiness required by a fabrication release.",
+              "closure": "Add a non-secret capability and calibration registry that separates desired, installed, observed, calibrated, and production-qualified state and binds the exact tuple into each job.",
+              "acceptance": "A fabrication job either resolves and hash-binds its exact machine, material, plate, profile, color/tool, and calibration tuple or remains explicitly blocked."
+            },
+            {
+              "id": "recipe-deployment-lifecycle",
+              "priority": "P1",
+              "state": "open",
+              "owner": "hermhub",
+              "depends_on": [
+                "job-core-and-formal-schemas"
+              ],
+              "problem": "The doctor verifies recipe-manager deployment hashes, but there is no controlled atomic install, update, version manifest, verification, or rollback process for isolated Hermes profile copies.",
+              "closure": "Provide a source-owned deployment command with atomic copy, manifest, post-install verification, and rollback for all profile deployments.",
+              "acceptance": "A dry-run and temporary-profile test prove install, update, stale-copy detection, and rollback without editing deployed copies manually."
+            },
+            {
+              "id": "observability-and-worker-lifecycle",
+              "priority": "P1",
+              "state": "open",
+              "owner": "orcaslicer-hermhub-and-hermes-workspace",
+              "depends_on": [
+                "conductor-state-machine",
+                "provider-envelope"
+              ],
+              "problem": "The system has no unified terminal-state definition, event-driven response completion, worker lease/heartbeat/stale recovery, structured audit trail, or bounded resource-health contract.",
+              "closure": "Expose canonical audit events and terminal states, add leases and heartbeats with stale recovery, and report storage, GPU memory, capability age, retries, and artifact growth.",
+              "acceptance": "Interrupted and stale representative jobs resume or fail deterministically, Workspace knows when work is complete, and no completion claim depends only on elapsed time."
+            },
+            {
+              "id": "model-forge-legacy-removal",
+              "priority": "P1",
+              "state": "blocked-on-evidence",
+              "owner": "blender-mcp-and-openclaw-fleet",
+              "depends_on": [
+                "provider-envelope"
+              ],
+              "problem": "OpenClaw Fleet still contains the pre-migration Model Forge source copy.",
+              "closure": "Switch downstream consumers and preserve one successful end-to-end run from blender_mcp before deletion.",
+              "acceptance": "All consumers reference the Blender source, a real end-to-end run has hash-bound expected artifacts, and a verified recovery path exists before the duplicate is removed."
+            },
+            {
+              "id": "method-source-promotion",
+              "priority": "P1",
+              "state": "open",
+              "owner": "orcaslicer-and-blender-mcp",
+              "depends_on": [
+                "provider-envelope"
+              ],
+              "problem": "Several vector, CAD, procedural, and mechanism methods are still executable only from mixed spike/proof trees.",
+              "closure": "Promote reusable code and focused tests into maintained provider modules before pruning proof outputs.",
+              "acceptance": "Each retained method has a registered provider entry point, focused tests outside the proof tree, and at least one conductor-bound golden job."
+            },
+            {
+              "id": "artifact-retention",
+              "priority": "P1",
+              "state": "open",
+              "owner": "orcaslicer",
+              "depends_on": [
+                "conductor-state-machine"
+              ],
+              "problem": "Large mcp-workdir, spike, and ornament-run trees mix acquired assets, authored source, accepted evidence, caches, and disposable attempts.",
+              "closure": "Build a content-addressed provenance inventory and explicit keep, archive, regenerate, move, or delete decision before deduplication or deletion.",
+              "acceptance": "Every proposed cleanup target has a hash, classification, producer/job, evidence and rights use, canonical location, recovery path, and verified pre/post-move proof when applicable."
+            },
+            {
+              "id": "acceptance-campaign",
+              "priority": "P0-release-gate",
+              "state": "open",
+              "owner": "independent-reviewers",
+              "depends_on": [
+                "conductor-state-machine",
+                "provider-envelope",
+                "candidate-selection-projection",
+                "manufacturing-capability-and-calibration",
+                "method-source-promotion"
+              ],
+              "problem": "Focused unit and contract tests do not prove the unified pipeline across decor, mechanisms, generative donors, acquired models, non-print assets, populated plates, interruption, or detector failure.",
+              "closure": "Run versioned golden jobs for each representative path with known-bad positive controls, independent evaluation, interruption/resume, limitations, and immutable release manifests.",
+              "acceptance": "Every required profile completes its digital evidence target, each detector rejects its known-bad control, and physical claims remain unverified unless separately authorized evidence exists."
+            }
+          ],
+          "physical_action_performed": false,
+          "files_deleted": []
+        },
+        "environment": {
+          "repoConfigured": true,
+          "conductorAvailable": true,
+          "jobsRootAvailable": true
+        }
+      }
+    },
+    "authenticated_candidate_lookup": {
+      "status": 404,
+      "body": {
+        "ok": false,
+        "error": {
+          "code": "JOB_NOT_FOUND",
+          "message": "Print job passive-snap-track-20260725 was not found."
+        }
+      }
+    },
+    "authenticated_candidate_route": {
+      "status": 404,
+      "body": {
+        "ok": false,
+        "error": {
+          "code": "JOB_NOT_FOUND",
+          "message": "Print job passive-snap-track-20260725 was not found."
+        }
+      }
+    }
+  }
+}

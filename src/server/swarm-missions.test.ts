@@ -166,6 +166,113 @@ describe('swarm-missions', () => {
     expect(blocked?.mission.events.at(-1)?.type).toBe('blocked')
   })
 
+  it('keeps a partially active mission executing until remaining workers checkpoint', async () => {
+    const mod = await loadModule()
+    const mission = mod.createOrUpdateMission({
+      missionId: 'mission-partially-active',
+      title: 'Partially active mission',
+      assignments: [
+        {
+          workerId: 'fabrication',
+          task: 'Validate the hard fabrication contract',
+          reviewRequired: false,
+          criticality: 'hard',
+        },
+        {
+          workerId: 'reviewer',
+          task: 'Complete an independent review',
+          reviewRequired: false,
+          criticality: 'hard',
+        },
+      ],
+    })
+    for (const assignment of mission.assignments) {
+      mod.markMissionAssignmentDispatched({
+        missionId: mission.id,
+        workerId: assignment.workerId,
+        task: assignment.task,
+      })
+    }
+
+    const fabrication = mission.assignments.find(
+      (assignment) => assignment.workerId === 'fabrication',
+    )
+    mod.recordMissionAssignmentBlocked({
+      missionId: mission.id,
+      assignmentId: fabrication?.id,
+      workerId: 'fabrication',
+      reason: 'S0 evidence is missing.',
+      source: 'test',
+    })
+
+    expect(mod.getSwarmMission(mission.id)?.state).toBe('executing')
+  })
+
+  it('records advisory lane failure as a limitation without blocking hard-lane quorum', async () => {
+    const mod = await loadModule()
+    const mission = mod.createOrUpdateMission({
+      missionId: 'mission-advisory-limitation',
+      title: 'Advisory lane semantics',
+      assignments: [
+        {
+          workerId: 'fabrication',
+          task: 'Validate the hard fabrication contract',
+          reviewRequired: false,
+          criticality: 'hard',
+        },
+        {
+          workerId: 'researcher',
+          task: 'Compare an optional local vision lane',
+          reviewRequired: false,
+          criticality: 'advisory',
+        },
+      ],
+    })
+
+    const advisory = mission.assignments.find(
+      (assignment) => assignment.workerId === 'researcher',
+    )
+    mod.recordMissionAssignmentBlocked({
+      missionId: mission.id,
+      assignmentId: advisory?.id,
+      workerId: 'researcher',
+      reason: 'Optional local model is unavailable.',
+      source: 'test',
+    })
+    expect(mod.getSwarmMission(mission.id)?.state).toBe('planning')
+
+    const hard = mission.assignments.find(
+      (assignment) => assignment.workerId === 'fabrication',
+    )
+    const completed = mod.recordMissionCheckpoint({
+      missionId: mission.id,
+      assignmentId: hard?.id,
+      workerId: 'fabrication',
+      checkpoint: {
+        stateLabel: 'DONE',
+        runtimeState: 'idle',
+        checkpointStatus: 'done',
+        filesChanged: 'none',
+        commandsRun: 'none',
+        result: 'Hard fabrication review completed.',
+        blocker: null,
+        nextAction: 'none',
+        raw: 'STATE: DONE\nRESULT: Hard fabrication review completed.',
+      },
+      source: 'test',
+    })
+
+    expect(completed?.state).toBe('complete')
+    expect(
+      completed?.assignments.find(
+        (assignment) => assignment.workerId === 'researcher',
+      ),
+    ).toMatchObject({
+      criticality: 'advisory',
+      state: 'blocked',
+    })
+  })
+
   it('keeps dependent work queued until review-required assignments are reviewed', async () => {
     const mod = await loadModule()
     const mission = mod.createOrUpdateMission({
@@ -307,6 +414,7 @@ describe('swarm-missions', () => {
             rationale: null,
             dependsOn: [],
             reviewRequired: false,
+            criticality: 'hard',
             state: 'done',
             dispatchedAt: 1,
             completedAt: 1,
@@ -321,6 +429,7 @@ describe('swarm-missions', () => {
             rationale: null,
             dependsOn: [],
             reviewRequired: false,
+            criticality: 'advisory',
             state: 'blocked',
             dispatchedAt: 1,
             completedAt: 1,
@@ -364,6 +473,7 @@ describe('swarm-missions', () => {
           rationale: null,
           dependsOn: [],
           reviewRequired: false,
+          criticality: 'hard',
           state: 'done',
           dispatchedAt: recentUpdatedAt,
           completedAt: recentUpdatedAt,

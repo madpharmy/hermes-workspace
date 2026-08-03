@@ -38,6 +38,10 @@ type SwarmTerminalProps = {
 
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'closed' | 'error'
 
+export function shouldConnectSwarmTerminal(active: boolean): boolean {
+  return active
+}
+
 export const SwarmTerminal = memo(function SwarmTerminal({
   workerId,
   command,
@@ -132,6 +136,12 @@ export const SwarmTerminal = memo(function SwarmTerminal({
   }, [stop])
 
   useEffect(() => {
+    if (!shouldConnectSwarmTerminal(active)) {
+      setState('idle')
+      setError(null)
+      return
+    }
+
     let cancelled = false
 
     async function bootstrap() {
@@ -311,7 +321,7 @@ export const SwarmTerminal = memo(function SwarmTerminal({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workerId, command.join('|'), cwd, reconnectKey, focusTerminal, flushPendingInput])
+  }, [workerId, command.join('|'), cwd, reconnectKey, active, focusTerminal, flushPendingInput])
 
   useEffect(() => {
     if (!active) return

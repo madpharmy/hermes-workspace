@@ -13,6 +13,7 @@ import {
 } from '@hugeicons/core-free-icons'
 import type { CrewMember } from '@/hooks/use-crew-status'
 import { cn } from '@/lib/utils'
+import { buildAsyncSwarmDispatchPayload } from '@/lib/swarm-dispatch-contract'
 
 type Mode = 'auto' | 'manual' | 'broadcast'
 
@@ -40,6 +41,8 @@ type DispatchResult = {
 export type DispatchResponse = {
   dispatchedAt: number
   completedAt: number
+  accepted?: boolean
+  missionId?: string
   results: Array<DispatchResult>
 }
 
@@ -239,11 +242,7 @@ export function RouterChat({
       const res = await fetch('/api/swarm-dispatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assignments: plan,
-          timeoutSeconds: 300,
-          waitForCheckpoint: false,
-        }),
+        body: JSON.stringify(buildAsyncSwarmDispatchPayload(plan)),
         signal: AbortSignal.timeout(60_000),
       })
       if (!res.ok) {
@@ -508,7 +507,7 @@ export function RouterChat({
         {!embedded && results ? (
           <div className="max-h-64 overflow-y-auto border-t border-[var(--theme-border)] px-5 py-3">
             <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-[var(--theme-muted)]">
-              <span>Dispatch results</span>
+              <span>{results.accepted ? 'Mission accepted' : 'Dispatch results'}</span>
               <span className="inline-flex items-center gap-1 text-[var(--theme-muted)]">
                 <HugeiconsIcon icon={Clock01Icon} size={11} />
                 {((results.completedAt - results.dispatchedAt) / 1000).toFixed(
@@ -517,8 +516,14 @@ export function RouterChat({
                 s
               </span>
             </div>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {results.results.map((r) => (
+            {results.accepted ? (
+              <div className="mt-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-card)] px-3 py-2 text-[11px] text-[var(--theme-text)]">
+                Mission {results.missionId ?? 'queued'} is running in the background.
+                Track worker checkpoints in Active Swarm, Inbox, and Reports.
+              </div>
+            ) : (
+              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {results.results.map((r) => (
                 <div
                   key={r.workerId}
                   className={cn(
@@ -575,8 +580,9 @@ export function RouterChat({
                     </pre>
                   ) : null}
                 </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : null}
 

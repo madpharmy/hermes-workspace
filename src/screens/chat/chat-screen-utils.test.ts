@@ -4,6 +4,7 @@ import {
   advanceStickyStreamingText,
   createResponseWaitSnapshot,
   isTerminalActiveRunStatus,
+  shouldCancelStreamOnNavigation,
   shouldClearWaitingForAssistantMessage,
 } from './chat-screen-utils'
 
@@ -89,6 +90,77 @@ describe('response wait detection', () => {
           },
         ],
         snapshot,
+      ),
+    ).toBe(true)
+  })
+})
+
+describe('stream cancellation on navigation', () => {
+  const activeSend = {
+    sessionKey: 'thread-123',
+    friendlyId: 'thread-123',
+  }
+
+  it('preserves the first response while a new chat resolves to its saved thread', () => {
+    expect(
+      shouldCancelStreamOnNavigation(
+        { activeCanonicalKey: null, activeFriendlyId: 'new', isNewChat: true },
+        {
+          activeCanonicalKey: null,
+          activeFriendlyId: 'thread-123',
+          isNewChat: false,
+        },
+        activeSend,
+      ),
+    ).toBe(false)
+  })
+
+  it('preserves the response while the active thread canonical key resolves', () => {
+    expect(
+      shouldCancelStreamOnNavigation(
+        {
+          activeCanonicalKey: null,
+          activeFriendlyId: 'thread-123',
+          isNewChat: false,
+        },
+        {
+          activeCanonicalKey: 'thread-123',
+          activeFriendlyId: 'thread-123',
+          isNewChat: false,
+        },
+        activeSend,
+      ),
+    ).toBe(false)
+  })
+
+  it('cancels when the user navigates to another thread', () => {
+    expect(
+      shouldCancelStreamOnNavigation(
+        {
+          activeCanonicalKey: 'thread-123',
+          activeFriendlyId: 'thread-123',
+          isNewChat: false,
+        },
+        {
+          activeCanonicalKey: 'thread-456',
+          activeFriendlyId: 'thread-456',
+          isNewChat: false,
+        },
+        activeSend,
+      ),
+    ).toBe(true)
+  })
+
+  it('cancels when a new-chat transition resolves to a different thread', () => {
+    expect(
+      shouldCancelStreamOnNavigation(
+        { activeCanonicalKey: null, activeFriendlyId: 'new', isNewChat: true },
+        {
+          activeCanonicalKey: null,
+          activeFriendlyId: 'thread-456',
+          isNewChat: false,
+        },
+        activeSend,
       ),
     ).toBe(true)
   })

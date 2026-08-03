@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { cn } from '@/lib/utils'
+import { PrintAnythingJobsPanel } from './print-anything-jobs-panel'
 
 type KanbanLane = 'backlog' | 'ready' | 'running' | 'review' | 'blocked' | 'done'
 
@@ -442,6 +443,8 @@ export function Swarm2KanbanBoard({
           </button>
         </div>
       </div>
+
+      <PrintAnythingJobsPanel className="mb-4" />
 
       {labelOptions.length > 0 ? (
         <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
