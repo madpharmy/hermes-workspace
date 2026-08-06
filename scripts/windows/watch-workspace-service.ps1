@@ -12,6 +12,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 
 function Write-WatchdogLog {
   param([Parameter(Mandatory = $true)][string]$Message)

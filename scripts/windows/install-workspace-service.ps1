@@ -12,7 +12,9 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $startScript = Join-Path $PSScriptRoot 'start-workspace-service.ps1'
 $watchdogScript = Join-Path $PSScriptRoot 'watch-workspace-service.ps1'
+$hiddenPowerShellRunner = Join-Path $PSScriptRoot 'run-hidden-powershell.vbs'
 $powershellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
+$wscriptPath = Join-Path $env:SystemRoot 'System32\wscript.exe'
 $nodePath = (Get-Command node.exe -ErrorAction Stop).Source
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
 $stateRoot = Join-Path $env:LOCALAPPDATA 'Hermes Workspace'
@@ -33,7 +35,44 @@ function Backup-ScheduledTaskDefinition {
   Write-Host "Backed up $TaskName to $backupPath"
 }
 
-foreach ($requiredPath in $startScript, $watchdogScript) {
+function ConvertTo-TaskActionArguments {
+  param([Parameter(Mandatory = $true)][string[]]$Values)
+
+  return (@($Values | ForEach-Object {
+    if ($_.Contains('"')) {
+      throw "Scheduled Task arguments cannot contain a double quote: $_"
+    }
+    '"' + $_ + '"'
+  }) -join ' ')
+}
+
+function New-HiddenPowerShellTaskAction {
+  param(
+    [Parameter(Mandatory = $true)][string]$ScriptPath,
+    [string[]]$ScriptArguments = @()
+  )
+
+  $arguments = @(
+    '//B',
+    '//NoLogo',
+    $hiddenPowerShellRunner,
+    $powershellPath,
+    '-NoProfile',
+    '-NonInteractive',
+    '-ExecutionPolicy',
+    'Bypass',
+    '-WindowStyle',
+    'Hidden',
+    '-File',
+    $ScriptPath
+  ) + $ScriptArguments
+
+  return New-ScheduledTaskAction `
+    -Execute $wscriptPath `
+    -Argument (ConvertTo-TaskActionArguments -Values $arguments)
+}
+
+foreach ($requiredPath in $startScript, $watchdogScript, $hiddenPowerShellRunner, $powershellPath, $wscriptPath) {
   if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
     throw "Required service script not found: $requiredPath"
   }
@@ -47,8 +86,9 @@ if (-not $WhatIfPreference) {
 }
 
 $principal = New-ScheduledTaskPrincipal -UserId $identity -LogonType Interactive -RunLevel Limited
-$workspaceActionArguments = '-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -RepositoryRoot "{1}" -NodePath "{2}"' -f $startScript, $repositoryRoot, $nodePath
-$workspaceAction = New-ScheduledTaskAction -Execute $powershellPath -Argument $workspaceActionArguments
+$workspaceAction = New-HiddenPowerShellTaskAction `
+  -ScriptPath $startScript `
+  -ScriptArguments @('-RepositoryRoot', $repositoryRoot, '-NodePath', $nodePath)
 $workspaceTrigger = New-ScheduledTaskTrigger -AtLogOn -User $identity
 $workspaceSettings = New-ScheduledTaskSettingsSet `
   -AllowStartIfOnBatteries `
@@ -71,8 +111,9 @@ if ($PSCmdlet.ShouldProcess($WorkspaceTaskName, 'Register canonical Workspace pr
     -Force | Out-Null
 }
 
-$watchdogActionArguments = '-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -TaskName "{1}" -RepositoryRoot "{2}"' -f $watchdogScript, $WorkspaceTaskName, $repositoryRoot
-$watchdogAction = New-ScheduledTaskAction -Execute $powershellPath -Argument $watchdogActionArguments
+$watchdogAction = New-HiddenPowerShellTaskAction `
+  -ScriptPath $watchdogScript `
+  -ScriptArguments @('-TaskName', $WorkspaceTaskName, '-RepositoryRoot', $repositoryRoot)
 $watchdogLogonTrigger = New-ScheduledTaskTrigger -AtLogOn -User $identity
 $watchdogRepeatingTrigger = New-ScheduledTaskTrigger `
   -Once `

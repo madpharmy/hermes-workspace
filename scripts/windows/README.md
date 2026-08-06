@@ -27,6 +27,12 @@ or copy `.env` values. The launcher loads the repository `.env` directly into
 the child process and writes lifecycle output to
 `%LOCALAPPDATA%\Hermes Workspace\workspace.log`.
 
+Both tasks retain the signed-in user's interactive security context for local
+and network access, but their PowerShell processes are launched through the
+repository's `run-hidden-powershell.vbs` helper. This prevents the Windows 11
+default-terminal delegation path from opening a visible Windows Terminal
+window during startup or the watchdog's one-minute health probe.
+
 For exact interruption evidence, enable the Task Scheduler Operational channel
 once from an elevated PowerShell window:
 
@@ -39,6 +45,7 @@ wevtutil sl Microsoft-Windows-TaskScheduler/Operational /e:true
 ```powershell
 Invoke-WebRequest -UseBasicParsing http://127.0.0.1:3000/api/healthcheck
 Get-ScheduledTask Hermes_Workspace,Hermes_Workspace_Watchdog,Hermes_Gateway,HermHub-Dashboard
+.\scripts\windows\test-hidden-powershell-runner.ps1
 ```
 
 To exercise the recovery path, stop only the canonical Workspace task and run
