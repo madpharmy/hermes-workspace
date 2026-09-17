@@ -254,6 +254,18 @@ async function requestHandler(req, res) {
     `http://${req.headers.host || 'localhost'}`,
   )
 
+  if (req.method === 'GET' && incomingUrl.pathname === '/api/healthcheck') {
+    const body = JSON.stringify({ ok: true })
+    res.writeHead(200, {
+      ...ALWAYS_HEADERS,
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Length': Buffer.byteLength(body),
+      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+    })
+    res.end(body)
+    return
+  }
+
   if (req.method === 'GET' && incomingUrl.pathname === '/api/network-url') {
     const requestedPort = parseInt(incomingUrl.searchParams.get('port') || '', 10)
     const safePort =

@@ -1,16 +1,19 @@
 # Windows Setup Guide — Hermes Workspace
 
-Last updated: 2026-05-28
+Last updated: 2026-09-16
 
 ## Architecture
 
-Three services, three config files:
+Use **Hermes Workspace** as the UI. One live Hermes Agent serves the gateway
+and the dashboard backend. The HermHub git checkout is plugin/voice source,
+not a second running agent.
 
 | Service | Port | Config file |
 |---|---|---|
 | Hermes Agent Gateway | 8642 | `C:\Users\<you>\AppData\Local\hermes\.env` |
+| Hermes Agent dashboard backend | 9119 | same live Hermes home |
 | Hermes CLI tools | — | `C:\Users\<you>\.hermes\.env` |
-| Workspace Dashboard | 3000 | `C:\Users\<you>\hermes-workspace\.env` |
+| Workspace UI | 3000 | `C:\Users\<you>\Documents\Projects\hermes-workspace\.env` |
 
 ## Required .env contents
 
@@ -57,18 +60,19 @@ npm install -g pnpm
 
 ## Start sequence
 
-```bash
-# Terminal 1 — Gateway
+```powershell
+# Terminal 1 — Gateway (already owned by Hermes_Gateway)
 hermes gateway run
 
-# Wait for: "Uvicorn running on http://127.0.0.1:8642"
+# Terminal 2 — Dashboard backend (same live Hermes as the gateway)
+hermes dashboard --port 9119 --host 127.0.0.1 --no-open --skip-build
 
-# Terminal 2 — Dashboard
-cd C:\Users\<you>\hermes-workspace
+# Terminal 3 — Workspace UI, or use the Hermes_Workspace scheduled task
+cd C:\Users\<you>\Documents\Projects\hermes-workspace
 pnpm dev
-
-# Open http://127.0.0.1:3000
 ```
+
+Open http://127.0.0.1:3000. Do not use http://127.0.0.1:9119 as the chat UI.
 
 ## Port conflict resolution
 

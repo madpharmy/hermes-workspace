@@ -2,6 +2,7 @@
 param(
   [string]$WorkspaceTaskName = 'Hermes_Workspace',
   [string]$WatchdogTaskName = 'Hermes_Workspace_Watchdog',
+  [string]$DashboardTaskName = 'HermHub-Dashboard',
   [string]$DuplicateDashboardTaskName = 'Hermes_Dashboard',
   [switch]$SkipStart
 )
@@ -12,6 +13,7 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $startScript = Join-Path $PSScriptRoot 'start-workspace-service.ps1'
 $watchdogScript = Join-Path $PSScriptRoot 'watch-workspace-service.ps1'
+$dashboardScript = Join-Path $PSScriptRoot 'start-hermes-dashboard.ps1'
 $hiddenPowerShellRunner = Join-Path $PSScriptRoot 'run-hidden-powershell.vbs'
 $powershellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
 $wscriptPath = Join-Path $env:SystemRoot 'System32\wscript.exe'
@@ -72,7 +74,7 @@ function New-HiddenPowerShellTaskAction {
     -Argument (ConvertTo-TaskActionArguments -Values $arguments)
 }
 
-foreach ($requiredPath in $startScript, $watchdogScript, $hiddenPowerShellRunner, $powershellPath, $wscriptPath) {
+foreach ($requiredPath in $startScript, $watchdogScript, $dashboardScript, $hiddenPowerShellRunner, $powershellPath, $wscriptPath) {
   if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
     throw "Required service script not found: $requiredPath"
   }
@@ -82,6 +84,7 @@ New-Item -ItemType Directory -Path $stateRoot -Force | Out-Null
 if (-not $WhatIfPreference) {
   Backup-ScheduledTaskDefinition -TaskName $WorkspaceTaskName
   Backup-ScheduledTaskDefinition -TaskName $WatchdogTaskName
+  Backup-ScheduledTaskDefinition -TaskName $DashboardTaskName
   Backup-ScheduledTaskDefinition -TaskName $DuplicateDashboardTaskName
 }
 
@@ -139,6 +142,29 @@ if ($PSCmdlet.ShouldProcess($WatchdogTaskName, 'Register Workspace health watchd
     -Force | Out-Null
 }
 
+$dashboardAction = New-HiddenPowerShellTaskAction -ScriptPath $dashboardScript
+$dashboardTrigger = New-ScheduledTaskTrigger -AtLogOn -User $identity
+$dashboardSettings = New-ScheduledTaskSettingsSet `
+  -AllowStartIfOnBatteries `
+  -DontStopIfGoingOnBatteries `
+  -DontStopOnIdleEnd `
+  -ExecutionTimeLimit ([timespan]::Zero) `
+  -MultipleInstances IgnoreNew `
+  -RestartCount 3 `
+  -RestartInterval (New-TimeSpan -Minutes 1) `
+  -StartWhenAvailable
+
+if ($PSCmdlet.ShouldProcess($DashboardTaskName, 'Register Hermes dashboard backend task for Workspace')) {
+  Register-ScheduledTask `
+    -TaskName $DashboardTaskName `
+    -Action $dashboardAction `
+    -Trigger $dashboardTrigger `
+    -Settings $dashboardSettings `
+    -Principal $principal `
+    -Description 'Hermes Agent dashboard backend on http://127.0.0.1:9119. Required by Hermes Workspace; not the primary UI.' `
+    -Force | Out-Null
+}
+
 $duplicateDashboardTask = Get-ScheduledTask -TaskName $DuplicateDashboardTaskName -ErrorAction SilentlyContinue
 if ($duplicateDashboardTask) {
   $dashboardHealthy = $false
@@ -166,6 +192,7 @@ if (-not $SkipStart -and $PSCmdlet.ShouldProcess($WorkspaceTaskName, 'Start cano
 
 Write-Host "Workspace task: $WorkspaceTaskName"
 Write-Host "Watchdog task: $WatchdogTaskName"
+Write-Host "Dashboard task: $DashboardTaskName"
 Write-Host "Repository: $repositoryRoot"
 Write-Host "Node: $nodePath"
 if (Test-Path -LiteralPath $backupRoot) {

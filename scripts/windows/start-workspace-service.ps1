@@ -73,8 +73,23 @@ try {
   Write-ServiceLog "starting pid=$PID repository=$RepositoryRoot node=$resolvedNode"
   Push-Location -LiteralPath $RepositoryRoot
   try {
-    & $resolvedNode $serverEntry *>> $LogPath
-    $nativeExitCode = $LASTEXITCODE
+    # Node prints gateway/capability warnings to stderr during a healthy boot.
+    # Windows PowerShell turns redirected native stderr into ErrorRecords, and
+    # $ErrorActionPreference=Stop then kills this wrapper while the UI is
+    # starting. Keep stdout/stderr in the service log without treating warnings
+    # as a failed start.
+    $previousErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+      & $resolvedNode $serverEntry *>> $LogPath
+      $nativeExitCode = $LASTEXITCODE
+    }
+    finally {
+      $ErrorActionPreference = $previousErrorAction
+    }
+    if ($null -eq $nativeExitCode) {
+      $nativeExitCode = 0
+    }
   }
   finally {
     Pop-Location

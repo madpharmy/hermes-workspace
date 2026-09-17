@@ -9,8 +9,14 @@ Hermes Workspace uses two repository-owned Scheduled Tasks on Windows:
   Scheduler has stopped the launcher but left `server-entry.js` alive.
 
 The existing `Hermes_Gateway` task remains the owner of port `8642`.
-`HermHub-Dashboard` remains the owner of port `9119`; the obsolete duplicate
-`Hermes_Dashboard` task is disabled only when the Dashboard health check passes.
+`HermHub-Dashboard` owns port `9119` as the Hermes Agent dashboard **backend**
+for Workspace. It must use the same live Hermes install as the gateway
+(`%LOCALAPPDATA%\hermes\hermes-agent`), not the older HermHub 0.18 checkout.
+The obsolete duplicate `Hermes_Dashboard` task is disabled only when that
+dashboard health check passes.
+
+Do not treat HermHub's `/hermhub` page as the chat UI. Open Workspace on
+`http://127.0.0.1:3000`.
 
 ## Install or repair
 
