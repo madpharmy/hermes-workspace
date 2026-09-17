@@ -42,7 +42,7 @@ export const defaultStudioSettings: StudioSettings = {
   claudeToken: '',
   theme: 'system',
   accentColor: 'blue',
-  showUsageMeter: false,
+  showUsageMeter: true,
   editorFontSize: 13,
   editorWordWrap: true,
   editorMinimap: false,
@@ -79,6 +79,21 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'claude-settings',
       skipHydration: true,
+      version: 1,
+      migrate: function migrateSettings(persisted, fromVersion) {
+        const state = (persisted ?? {}) as SettingsState
+        const settings = {
+          ...defaultStudioSettings,
+          ...state.settings,
+        }
+        if (fromVersion < 1) {
+          settings.showUsageMeter = true
+        }
+        return {
+          ...state,
+          settings,
+        }
+      },
     },
   ),
 )

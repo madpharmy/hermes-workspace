@@ -935,7 +935,7 @@ function ChatDisplaySection() {
         </SettingsRow>
         <SettingsRow
           label="Show usage meter"
-          description="Show the floating usage/provider pill in chat. Off by default to keep the composer clean."
+          description="Show the floating usage/provider pill in chat, including context percent."
         >
           <Switch
             checked={settings.showUsageMeter}
