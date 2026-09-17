@@ -50,9 +50,10 @@ export function getKnowledgeBaseEffectiveRoot(): string {
     const p = config.source.path.trim()
     if (p) return path.resolve(p.replace(/^~\//, os.homedir() + '/'))
   }
-  // fallback: legacy env var or default
   if (process.env.KNOWLEDGE_DIR) return path.resolve(process.env.KNOWLEDGE_DIR)
-  const claudeKnowledge = path.join(os.homedir(), '.claude', 'knowledge')
-  if (fs.existsSync(claudeKnowledge)) return claudeKnowledge
-  return claudeKnowledge
+  const hermesHome =
+    process.env.HERMES_HOME?.trim() ||
+    process.env.CLAUDE_HOME?.trim() ||
+    path.join(os.homedir(), '.hermes')
+  return path.resolve(path.join(hermesHome, 'knowledge'))
 }

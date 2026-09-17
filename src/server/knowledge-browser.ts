@@ -119,14 +119,22 @@ function extractWikilinks(content: string): Array<string> {
 
 // ─── Legacy env-var fallback ──────────────────────────────────────────────────
 
+function getHermesHome(): string {
+  const envHome = (process.env.HERMES_HOME || process.env.CLAUDE_HOME)?.trim()
+  return envHome
+    ? path.resolve(envHome)
+    : path.resolve(path.join(os.homedir(), '.hermes'))
+}
+
 function getLegacyKnowledgeRoot(): string {
   if (process.env.KNOWLEDGE_DIR) return path.resolve(process.env.KNOWLEDGE_DIR)
-  const claudeHome = path.join(os.homedir(), '.claude')
-  const claudeKnowledge = path.join(claudeHome, 'knowledge')
+  const hermesKnowledge = path.join(getHermesHome(), 'knowledge')
+  if (fs.existsSync(hermesKnowledge)) return hermesKnowledge
+  const claudeKnowledge = path.join(os.homedir(), '.claude', 'knowledge')
   if (fs.existsSync(claudeKnowledge)) return claudeKnowledge
   const homeKnowledge = path.join(os.homedir(), 'knowledge', 'wiki')
   if (fs.existsSync(homeKnowledge)) return homeKnowledge
-  return claudeKnowledge
+  return hermesKnowledge
 }
 
 // ─── GitHub Knowledge Provider ─────────────────────────────────────────────────
@@ -228,7 +236,7 @@ class GitHubKnowledgeProvider {
 
 // ─── Config-aware root resolution ──────────────────────────────────────────────
 
-function getKnowledgeRoot(): string {
+export function getKnowledgeRoot(): string {
   const config = readKnowledgeBaseConfig()
   const source = config.source
 

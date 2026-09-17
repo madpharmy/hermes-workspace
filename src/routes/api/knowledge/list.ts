@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { isAuthenticated } from '../../../server/auth-middleware'
 import {
+  getKnowledgeRoot,
   knowledgeRootExists,
   listKnowledgePages,
 } from '../../../server/knowledge-browser'
@@ -23,6 +24,7 @@ export const Route = createFileRoute('/api/knowledge/list')({
             pages: exists ? listKnowledgePages() : [],
             exists,
             source,
+            knowledgeRoot: getKnowledgeRoot(),
           })
         } catch (error) {
           return json(
