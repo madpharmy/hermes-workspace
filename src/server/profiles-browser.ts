@@ -157,14 +157,25 @@ function latestMtime(paths: Array<string>): string | undefined {
   return latest > 0 ? new Date(latest).toISOString() : undefined
 }
 
-function extractDescription(config: Record<string, unknown>): string {
+function extractDescription(
+  config: Record<string, unknown>,
+  profilePath?: string,
+): string {
   const direct = config.description
-  if (typeof direct === 'string') return direct.trim()
+  if (typeof direct === 'string' && direct.trim()) return direct.trim()
 
   const metadata = config.metadata
   if (metadata && typeof metadata === 'object' && !Array.isArray(metadata)) {
     const nested = (metadata as Record<string, unknown>).description
-    if (typeof nested === 'string') return nested.trim()
+    if (typeof nested === 'string' && nested.trim()) return nested.trim()
+  }
+
+  if (profilePath) {
+    const fromProfileYaml = readYamlConfig(path.join(profilePath, 'profile.yaml'))
+    const yamlDescription = fromProfileYaml.description
+    if (typeof yamlDescription === 'string' && yamlDescription.trim()) {
+      return yamlDescription.trim()
+    }
   }
 
   return ''
@@ -433,7 +444,7 @@ export function listProfiles(): Array<ProfileSummary> {
         exists: true,
         model: modelName,
         provider: providerName,
-        description: extractDescription(config) || undefined,
+        description: extractDescription(config, profilePath) || undefined,
         systemPrompt: extractSystemPrompt(config, profilePath) || undefined,
         skillCount,
         sessionCount,
@@ -475,7 +486,7 @@ export function listProfiles(): Array<ProfileSummary> {
     exists: true,
     model: defaultModel,
     provider: defaultProvider,
-    description: extractDescription(config) || undefined,
+    description: extractDescription(config, root) || undefined,
     systemPrompt: extractSystemPrompt(config, root) || undefined,
     skillCount: countFilesRecursive(
       path.join(root, 'skills'),
@@ -514,7 +525,7 @@ export function readProfile(name: string): ProfileDetail {
     path: profilePath,
     active: normalized === active,
     config,
-    description: extractDescription(config),
+    description: extractDescription(config, profilePath),
     systemPrompt: extractSystemPrompt(config, profilePath),
     envPath: fs.existsSync(envPath) ? envPath : undefined,
     hasEnv: fs.existsSync(envPath),

@@ -138,4 +138,28 @@ describe('listProfiles', () => {
     )
     expect(readProfile('ops').systemPrompt).toBe('Config prompt wins')
   })
+
+  it('falls back to profile.yaml when config.yaml has no description', () => {
+    const hermesRoot = path.join(tempHome, '.hermes')
+    const profileRoot = path.join(hermesRoot, 'profiles', 'uncen')
+
+    fs.mkdirSync(profileRoot, { recursive: true })
+    fs.writeFileSync(
+      path.join(profileRoot, 'config.yaml'),
+      'model:\n  default: qwen38-uncen:27b-ctx128k\n',
+      'utf-8',
+    )
+    fs.writeFileSync(
+      path.join(profileRoot, 'profile.yaml'),
+      'description: FrameworkD OrcaRouter uncensored Q8_0\n',
+      'utf-8',
+    )
+
+    expect(listProfiles().find((profile) => profile.name === 'uncen')?.description).toBe(
+      'FrameworkD OrcaRouter uncensored Q8_0',
+    )
+    expect(readProfile('uncen').description).toBe(
+      'FrameworkD OrcaRouter uncensored Q8_0',
+    )
+  })
 })

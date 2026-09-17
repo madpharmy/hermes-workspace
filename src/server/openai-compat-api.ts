@@ -279,15 +279,21 @@ export async function openaiChat(
   options: OpenAIChatOptions = {},
 ): Promise<string | AsyncGenerator<StreamChunkType, void, void>> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  const bearer = getBearerToken()
-  if (bearer) {
-    headers['Authorization'] = `Bearer ${bearer}`
+  if (options.baseUrl) {
+    headers['Authorization'] = 'Bearer ollama'
+  } else {
+    const bearer = getBearerToken()
+    if (bearer) {
+      headers['Authorization'] = `Bearer ${bearer}`
+    }
   }
   // Session continuity is part of request routing, not authentication.
   // If the gateway requires auth, _check_auth has already validated the
   // bearer above; when it does not, dropping these headers forces Hermes
   // Agent to derive a fresh api-* session from each message payload.
-  if (options.sessionId) {
+  // Direct local-provider calls (Ollama, etc.) must not receive Hermes
+  // session headers or a Codex/Hermes bearer.
+  if (options.sessionId && !options.baseUrl) {
     headers['X-Hermes-Session-Id'] = options.sessionId
     // Back-compat for older/Claude-compatible adapters that still look for
     // the pre-Hermes header name.  Hermes Agent ignores this alias.

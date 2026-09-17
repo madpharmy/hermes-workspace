@@ -353,8 +353,13 @@ export const Route = createFileRoute('/api/send-stream')({
         let chatMode = getChatMode()
         let localBaseUrl: string | undefined
         const requestModel = typeof body.model === 'string' ? body.model : ''
+        const requestedBaseUrl =
+          typeof body.baseUrl === 'string' ? body.baseUrl.trim() : ''
         const bareModel = requestModel.includes('/') ? requestModel.split('/').slice(1).join('/') : requestModel
-        if (requestModel) {
+        if (requestedBaseUrl) {
+          chatMode = 'portable'
+          localBaseUrl = requestedBaseUrl.replace(/\/+$/, '')
+        } else if (requestModel) {
           const discoveredModels = getDiscoveredModels()
           const localMatch = discoveredModels.find((m) => m.id === requestModel || m.id === bareModel)
           if (localMatch) {
@@ -538,6 +543,9 @@ export const Route = createFileRoute('/api/send-stream')({
                 activeRunId = runId
                 registerActiveSendRun(runId)
                 persistRunStarted(runId, portableSessionKey, portableFriendlyId)
+                // Operations uses synthetic session keys that are not Hermes
+                // gateway sessions. Binding them via X-Hermes-Session-Id made
+                // /v1/chat/completions return an empty completed stream.
                 unregisterTimer = setTimeout(() => {
                   if (activeRunId) {
                     unregisterActiveSendRun(activeRunId)
@@ -623,7 +631,9 @@ export const Route = createFileRoute('/api/send-stream')({
                         conversationHistory: effectiveHistory,
                         model:
                           typeof body.model === 'string' ? body.model : undefined,
-                        sessionId: portableSessionKey,
+                        sessionId: portableSessionKey.startsWith('agent:main:ops-')
+                          ? undefined
+                          : portableSessionKey,
                         signal: abortController.signal,
                       })
                       for await (const ev of responsesStream) {
@@ -765,7 +775,9 @@ export const Route = createFileRoute('/api/send-stream')({
                         : undefined,
                     signal: abortController.signal,
                     stream: true,
-                    sessionId: portableSessionKey,
+                    sessionId: portableSessionKey.startsWith('agent:main:ops-')
+                      ? undefined
+                      : portableSessionKey,
                     baseUrl: localBaseUrl,
                   })
 

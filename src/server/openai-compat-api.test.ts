@@ -1,3 +1,4 @@
+import os from 'node:os'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { openaiChat, parseOpenAIStream } from './openai-compat-api'
@@ -55,6 +56,9 @@ describe('openaiChat', () => {
 
   it('sends Hermes session continuity headers even without a bearer token', async () => {
     process.env.HOME = '/tmp/hermes-workspace-test-no-codex-auth'
+    vi.spyOn(os, 'homedir').mockReturnValue(
+      '/tmp/hermes-workspace-test-no-codex-auth',
+    )
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
         JSON.stringify({ choices: [{ message: { content: 'ok' } }] }),
@@ -69,9 +73,32 @@ describe('openaiChat', () => {
     })
 
     const headers = fetchMock.mock.calls[0]?.[1]?.headers as Record<string, string>
-    expect(headers.Authorization).toBeUndefined()
     expect(headers['X-Hermes-Session-Id']).toBe('workspace-session-2')
     expect(headers['X-Claude-Session-Id']).toBe('workspace-session-2')
+  })
+
+  it('does not send Hermes session headers to a local provider baseUrl', async () => {
+    process.env.HERMES_API_TOKEN = 'test-token'
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({ choices: [{ message: { content: 'ok' } }] }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await openaiChat([{ role: 'user', content: 'hello' }], {
+      model: 'qwen38-uncen:27b-ctx128k',
+      sessionId: 'agent:main:ops-uncen',
+      baseUrl: 'http://127.0.0.1:11434/v1',
+    })
+
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Record<string, string>
+    const endpoint = fetchMock.mock.calls[0]?.[0]
+    expect(endpoint).toBe('http://127.0.0.1:11434/v1/chat/completions')
+    expect(headers.Authorization).toBe('Bearer ollama')
+    expect(headers['X-Hermes-Session-Id']).toBeUndefined()
+    expect(headers['X-Claude-Session-Id']).toBeUndefined()
   })
 })
 
